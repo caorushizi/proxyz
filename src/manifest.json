@@ -3,15 +3,9 @@
   "name": "Sample Web Extension",
   "version": "0.0.1",
   "background": {
-    "service_worker": "background.ts",
+    "service_worker": "background/index.ts",
     "type": "module"
   },
-  "content_scripts": [
-    {
-      "matches": ["*://github.com/parcel-bundler/*"],
-      "js": ["parcel-content-script.ts"]
-    }
-  ],
   "options_ui": {
     "page": "options.html",
     "open_in_tab": true
@@ -21,5 +15,6 @@
     "default_popup": "popup.html",
     "default_icon": {}
   },
-  "permissions": ["storage"]
+  "permissions": ["storage", "proxy", "webRequest", "action"],
+  "host_permissions": ["<all_urls>"]
 }

@@ -5,24 +5,29 @@ import {
   RetweetOutlined,
   SnippetsOutlined,
   QuestionCircleOutlined,
+  SwapOutlined,
 } from "@ant-design/icons";
 
 interface ProxyIconProps {
   type: ProxyMode;
+  color?: string;
 }
 
-const ProxyIcon: React.FC<ProxyIconProps> = ({ type }) => {
+const ProxyIcon: React.FC<ProxyIconProps> = ({ type, color }) => {
   if (type === ProxyMode.Proxy) {
-    return <GlobalOutlined />;
+    return <GlobalOutlined style={{ color }} />;
   }
-  if (type === ProxyMode.AutoProxy) {
-    return <RetweetOutlined />;
+  if (type === ProxyMode.Auto) {
+    return <RetweetOutlined style={{ color }} />;
   }
   if (type === ProxyMode.PAC) {
-    return <SnippetsOutlined />;
+    return <SnippetsOutlined style={{ color }} />;
   }
   if (type === ProxyMode.Virtual) {
-    return <QuestionCircleOutlined />;
+    return <QuestionCircleOutlined style={{ color }} />;
+  }
+  if (type === ProxyMode.Direct) {
+    return <SwapOutlined style={{ color }} />;
   }
 
   return null;

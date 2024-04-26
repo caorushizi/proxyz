@@ -8,8 +8,10 @@ import { createHashRouter, RouterProvider } from "react-router-dom";
 import Interface from "./nodes/Interface";
 import General from "./nodes/General";
 import Export from "./nodes/Export";
-import Mode from "./nodes/Mode";
+import Profile from "./nodes/Profile";
 import "./assets/base.scss";
+import { store } from "./store";
+import { Provider } from "react-redux";
 
 const router = createHashRouter([
   {
@@ -30,7 +32,7 @@ const router = createHashRouter([
       },
       {
         path: "/profile/:id",
-        element: <Mode />,
+        element: <Profile />,
       },
     ],
   },
@@ -40,9 +42,11 @@ const root = createRoot(document.getElementById("app")!);
 root.render(
   <React.StrictMode>
     <ConfigProvider locale={zhCN}>
-      <App>
-        <RouterProvider router={router} />
-      </App>
+      <Provider store={store}>
+        <App>
+          <RouterProvider router={router} />
+        </App>
+      </Provider>
     </ConfigProvider>
   </React.StrictMode>,
 );

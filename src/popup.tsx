@@ -38,9 +38,7 @@ const items: MenuProps["items"] = [
 ];
 
 const App = () => {
-  const onClick: MenuProps["onClick"] = (e) => {
-    console.log("click ", e);
-  };
+  const onClick: MenuProps["onClick"] = () => {};
   return <Menu onClick={onClick} style={{ width: 230 }} items={items} />;
 };
 

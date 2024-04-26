@@ -1,6 +1,6 @@
 import { IDBPDatabase, openDB } from "idb";
-import { Profile } from "../store/Profile";
 import { ProxyMode } from "../helper";
+import { Profile } from "../helper/constant";
 
 let db: IDBPDatabase<Profile> | null = null;
 
@@ -19,19 +19,32 @@ async function getDB() {
   return db;
 }
 
-export async function addProfile(
+async function addProfile(
   name: string,
   type: ProxyMode,
+  color: string,
 ): Promise<number> {
   const db = await getDB();
   const id = await db.add("profiles", {
     name,
     type,
+    color,
   });
   return id as number;
 }
 
-export async function getProfiles() {
+async function getProfiles() {
   const db = await getDB();
   return await db.getAll("profiles");
 }
+
+async function findProfile(id: number) {
+  const db = await getDB();
+  return await db.get("profiles", id);
+}
+
+export default {
+  addProfile,
+  getProfiles,
+  findProfile,
+};

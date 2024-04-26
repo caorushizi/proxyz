@@ -2,10 +2,10 @@ import React, { FC } from "react";
 import { Layout } from "antd";
 import { createStyles, css } from "antd-style";
 import { Outlet } from "react-router-dom";
-import { ProfileList } from "../store/ProfileList";
 import SiderMenu from "../components/SiderMenu";
 import { useAsyncEffect } from "ahooks";
-import { getProfiles } from "../db/profile";
+import { initProfiles } from "../store/profilesSlice";
+import { useAppDispatch } from "../hooks";
 
 const useStyle = createStyles({
   container: css`
@@ -25,18 +25,17 @@ const { Sider, Content } = Layout;
 
 const Options: FC = () => {
   const { styles } = useStyle();
-  const store = new ProfileList();
+  const dispatch = useAppDispatch();
 
   useAsyncEffect(async () => {
-    const profiles = await getProfiles();
-    store.setProfiles(profiles);
+    dispatch(initProfiles());
   });
 
   return (
     <Layout className={styles.container}>
       <Sider theme="light" className={styles.sider}>
         <h1 className={styles.header}>Proxyz</h1>
-        <SiderMenu profileList={store} />
+        <SiderMenu />
       </Sider>
       <Content>
         <Outlet />

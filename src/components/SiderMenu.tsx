@@ -10,7 +10,11 @@ import {
 } from "antd";
 import { createStyles, css } from "antd-style";
 import React from "react";
-import { ProxyMode, getMenuItem } from "../helper";
+import {
+  ProxyMode,
+  generateUnlimitedMacaronColor,
+  getMenuItem,
+} from "../helper";
 import { Link } from "react-router-dom";
 import {
   ModalForm,
@@ -23,16 +27,12 @@ import {
   SaveOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
-import { observer } from "mobx-react";
-import { ProfileList } from "../store/ProfileList";
 import ProxyIcon from "./ProxyIcon";
+import { useAppDispatch, useAppSelector } from "../hooks";
+import { addProfile, selectProfiles } from "../store/profilesSlice";
+import { Profile } from "../helper/constant";
 
 const { Text } = Typography;
-
-interface FormValues {
-  name: string;
-  proxy: ProxyMode;
-}
 
 const useStyle = createStyles({
   menu: css`
@@ -55,14 +55,12 @@ const useStyle = createStyles({
   `,
 });
 
-interface OptionsProps {
-  profileList: ProfileList;
-}
-
-const SiderMenu: React.FC<OptionsProps> = ({ profileList }) => {
-  const [form] = Form.useForm<FormValues>();
+const SiderMenu: React.FC = () => {
+  const [form] = Form.useForm<Pick<Profile, "name" | "type">>();
   const { message } = App.useApp();
   const { styles } = useStyle();
+  const profiles = useAppSelector(selectProfiles);
+  const dispatch = useAppDispatch();
 
   const renderDesc = (icon: React.ReactNode, title: string, desc: string) => {
     return (
@@ -78,7 +76,7 @@ const SiderMenu: React.FC<OptionsProps> = ({ profileList }) => {
 
   const renderAddForm = () => {
     return (
-      <ModalForm<FormValues>
+      <ModalForm<Pick<Profile, "name" | "type">>
         title="新建情景模式"
         trigger={
           <Button size="small" type="text" icon={<PlusOutlined />}></Button>
@@ -86,14 +84,15 @@ const SiderMenu: React.FC<OptionsProps> = ({ profileList }) => {
         form={form}
         autoFocusFirstInput
         className="new-options-form-radio"
-        initialValues={{ name: "", proxy: ProxyMode.Proxy }}
+        initialValues={{ name: "", type: ProxyMode.Proxy }}
         modalProps={{
           destroyOnClose: true,
-          onCancel: () => console.log("run"),
+          onCancel: () => {},
         }}
         submitTimeout={2000}
         onFinish={async (profile) => {
-          await profileList.addProfile(profile.name, profile.proxy);
+          const color = generateUnlimitedMacaronColor();
+          dispatch(addProfile({ ...profile, color }));
           message.success("添加成功");
           return true;
         }}
@@ -116,7 +115,7 @@ const SiderMenu: React.FC<OptionsProps> = ({ profileList }) => {
           }}
         />
         <ProFormRadio.Group
-          name="proxy"
+          name="type"
           label="请选择情景模式的类型"
           layout="vertical"
           required
@@ -131,11 +130,11 @@ const SiderMenu: React.FC<OptionsProps> = ({ profileList }) => {
             },
             {
               label: renderDesc(
-                <ProxyIcon type={ProxyMode.AutoProxy} />,
+                <ProxyIcon type={ProxyMode.Auto} />,
                 "自动切换模式",
                 "根据多种条件，如域名或网址等自动选择情景模式。您也可以导入在线发布的切换规则（如 AutoProxy 列表）以简化设置。",
               ),
-              value: ProxyMode.AutoProxy,
+              value: ProxyMode.Auto,
             },
             {
               label: renderDesc(
@@ -189,11 +188,11 @@ const SiderMenu: React.FC<OptionsProps> = ({ profileList }) => {
       </Flex>,
       "mode",
       null,
-      profileList.profiles.map((profile) =>
+      profiles.map((profile) =>
         getMenuItem(
           <Link to={`profile/${profile.id}`}>{profile.name}</Link>,
           profile.id,
-          <ProxyIcon type={profile.type} />,
+          <ProxyIcon type={profile.type} color={profile.color} />,
         ),
       ),
       "group",
@@ -210,4 +209,4 @@ const SiderMenu: React.FC<OptionsProps> = ({ profileList }) => {
   );
 };
 
-export default observer(SiderMenu);
+export default SiderMenu;
