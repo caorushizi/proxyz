@@ -1,5 +1,4 @@
 import { IDBPDatabase, openDB } from "idb";
-import { ProxyMode } from "../helper";
 import { Profile } from "../helper/constant";
 
 let db: IDBPDatabase<Profile> | null = null;
@@ -19,17 +18,9 @@ async function getDB() {
   return db;
 }
 
-async function addProfile(
-  name: string,
-  type: ProxyMode,
-  color: string,
-): Promise<number> {
+async function addProfile(profile: Omit<Profile, "id">): Promise<number> {
   const db = await getDB();
-  const id = await db.add("profiles", {
-    name,
-    type,
-    color,
-  });
+  const id = await db.add("profiles", profile);
   return id as number;
 }
 
@@ -43,8 +34,14 @@ async function findProfile(id: number) {
   return await db.get("profiles", id);
 }
 
+async function updateProfile(profile: Profile) {
+  const db = await getDB();
+  await db.put("profiles", profile);
+}
+
 export default {
   addProfile,
   getProfiles,
   findProfile,
+  updateProfile,
 };

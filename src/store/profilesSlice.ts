@@ -22,6 +22,12 @@ const profilesSlice = createSlice({
       })
       .addCase(addProfile.fulfilled, (state, action) => {
         state.push(action.payload);
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        const index = state.findIndex(
+          (profile) => profile.id === action.payload.id,
+        );
+        state[index] = action.payload;
       });
   },
 });
@@ -31,15 +37,24 @@ export const selectProfiles = (state: RootState) => state.profiles;
 
 export const initProfiles = createAsyncThunk("posts/initProfiles", async () => {
   const profiles = await db.getProfiles();
+  await chrome.storage.local.set({ profiles });
   return profiles;
 });
 
 export const addProfile = createAsyncThunk(
   "posts/addProfile",
-  async (item: Pick<Profile, "name" | "type" | "color">) => {
-    const id = await db.addProfile(item.name, item.type, item.color);
+  async (item: Omit<Profile, "id">) => {
+    const id = await db.addProfile(item);
     const profile = await db.findProfile(id);
     return profile;
+  },
+);
+
+export const updateProfile = createAsyncThunk(
+  "posts/updateProfile",
+  async (item: Profile) => {
+    await db.updateProfile(item);
+    return item;
   },
 );
 

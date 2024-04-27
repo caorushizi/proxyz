@@ -30,7 +30,7 @@ import {
 import ProxyIcon from "./ProxyIcon";
 import { useAppDispatch, useAppSelector } from "../hooks";
 import { addProfile, selectProfiles } from "../store/profilesSlice";
-import { Profile } from "../helper/constant";
+import { Profile, basicForm } from "../helper/constant";
 
 const { Text } = Typography;
 
@@ -92,7 +92,16 @@ const SiderMenu: React.FC = () => {
         submitTimeout={2000}
         onFinish={async (profile) => {
           const color = generateUnlimitedMacaronColor();
-          dispatch(addProfile({ ...profile, color }));
+          dispatch(
+            addProfile({
+              ...profile,
+              color,
+              options: {
+                type: "basic",
+                rules: basicForm,
+              },
+            }),
+          );
           message.success("添加成功");
           return true;
         }}

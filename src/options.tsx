@@ -8,7 +8,7 @@ import { createHashRouter, RouterProvider } from "react-router-dom";
 import Interface from "./nodes/Interface";
 import General from "./nodes/General";
 import Export from "./nodes/Export";
-import Profile from "./nodes/Profile";
+import ProfilePage from "./nodes/ProfilePage";
 import "./assets/base.scss";
 import { store } from "./store";
 import { Provider } from "react-redux";
@@ -32,7 +32,7 @@ const router = createHashRouter([
       },
       {
         path: "/profile/:id",
-        element: <Profile />,
+        element: <ProfilePage />,
       },
     ],
   },

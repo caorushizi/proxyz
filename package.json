@@ -4,8 +4,8 @@
   "description": "",
   "scripts": {
     "start": "parcel watch src/manifest.json --host localhost",
-    "build": "parcel build src/manifest.json",
-    "reporter": "parcel build src/manifest.json --reporter @parcel/reporter-bundle-analyzer",
+    "build": "parcel build src/manifest.json --no-source-maps",
+    "reporter": "parcel build src/manifest.json --no-source-maps --detailed-report 20 --reporter @parcel/reporter-bundle-analyzer",
     "prepare": "husky"
   },
   "keywords": [],

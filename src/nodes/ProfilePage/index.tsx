@@ -22,7 +22,7 @@ const Mode: React.FC = () => {
     }
 
     if (profile.type === ProxyMode.Proxy) {
-      return <Proxy />;
+      return <Proxy profile={profile} />;
     }
 
     if (profile.type === ProxyMode.Auto) {

@@ -1,5 +1,5 @@
 import { REQUEST_TIME_OUT } from "./const";
-import { cache } from "./utils";
+import { cache, requestCache } from "./utils";
 
 const filter: chrome.webRequest.RequestFilter = {
   urls: ["<all_urls>"],
@@ -15,12 +15,17 @@ function beforeRequestHandler(
     tabId: details.tabId,
     timestamp: details.timeStamp,
   });
-  chrome.action.setBadgeText({ text: "1", tabId: details.tabId });
 
   setTimeout(() => {
     const request = cache.get(details.requestId);
     if (request) {
-      console.log("timeout", request);
+      chrome.action.setBadgeText({ text: "1", tabId: request.tabId });
+      const tabReq = requestCache.get(request.tabId);
+      if (tabReq) {
+        tabReq.add(request);
+      } else {
+        requestCache.set(details.tabId, new Set([request]));
+      }
     }
   }, REQUEST_TIME_OUT);
 }
