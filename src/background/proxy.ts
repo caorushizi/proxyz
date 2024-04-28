@@ -1,24 +1,37 @@
 import pacScript from "bundle-text:./pac";
 
-import { emitter } from "./utils";
+import { emitter, info } from "./utils";
 import { Profile, ProxyMode } from "../helper/constant";
 
 async function setProxy(profile: Profile<ProxyMode.Proxy>) {
   const { options } = profile;
-  const { type, rules } = options;
-  const config = {
+  const {
+    type,
+    singleProxy,
+    proxyForFtp,
+    proxyForHttp,
+    proxyForHttps,
+    bypassList,
+  } = options;
+  const config: any = {
     mode: "fixed_servers",
     rules: {},
   };
   if (type === "basic") {
     config.rules = {
-      singleProxy: {
-        scheme: rules[0].protocol,
-        host: rules[0].host,
-        port: rules[0].port,
-      },
+      singleProxy,
+    };
+  } else {
+    config.rules = {
+      proxyForHttp,
+      proxyForHttps,
+      proxyForFtp,
     };
   }
+  if (bypassList) {
+    config.rules.bypassList = bypassList.map((item) => item.pattern);
+  }
+  info("setProxy", config);
   await chrome.proxy.settings.set({ value: config, scope: "regular" });
 }
 
@@ -26,10 +39,14 @@ async function setPAC() {
   const config = {
     mode: "pac_script",
     pacScript: {
-      data: pacScript,
+      data: pacScript.replace(
+        /globalThis.__REPLACE_HOST__/g,
+        JSON.stringify([]),
+      ),
       mandatory: true,
     },
   };
+  info("setPAC", config);
   await chrome.proxy.settings.set({ value: config, scope: "regular" });
 }
 

@@ -4,8 +4,7 @@ import "antd/dist/reset.css";
 import { ConfigProvider, theme } from "antd";
 import zhCN from "antd/locale/zh_CN";
 import Popup from "./nodes/Popup";
-import { Provider } from "react-redux";
-import { store } from "./store";
+import "./popup.scss";
 
 const root = createRoot(document.getElementById("app")!);
 
@@ -17,9 +16,7 @@ root.render(
       }}
       locale={zhCN}
     >
-      <Provider store={store}>
-        <Popup />
-      </Provider>
+      <Popup />
     </ConfigProvider>
   </React.StrictMode>,
 );

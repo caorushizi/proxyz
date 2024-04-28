@@ -1570,6 +1570,11 @@
   resolved "https://registry.npmmirror.com/@types/parse-json/-/parse-json-4.0.2.tgz#5950e50960793055845e956c427fc2b0d70c5239"
   integrity sha512-dISoDXWWQwUquiKsyZ4Ng+HX2KsPL7LyHKHQwgGFEA3IaKac4Obd+h2a/a6waisAoepJlBcx9paWqjA8/HVjCw==
 
+"@types/picomatch@^2.3.3":
+  version "2.3.3"
+  resolved "https://registry.npmmirror.com/@types/picomatch/-/picomatch-2.3.3.tgz#be60498568c19e989e43fb39aa84be1ed3655e92"
+  integrity sha512-Yll76ZHikRFCyz/pffKGjrCwe/le2CDwOP5F210KQo27kpRE46U2rDnzikNlVn6/ezH3Mhn46bJMTfeVTtcYMg==
+
 "@types/prop-types@*":
   version "15.7.12"
   resolved "https://registry.npmmirror.com/@types/prop-types/-/prop-types-15.7.12.tgz#12bb1e2be27293c1406acb6af1c3f3a1481d98c6"
@@ -3180,6 +3185,11 @@ immer@^10.0.3:
   version "10.0.4"
   resolved "https://registry.npmmirror.com/immer/-/immer-10.0.4.tgz#09af41477236b99449f9d705369a4daaf780362b"
   integrity sha512-cuBuGK40P/sk5IzWa9QPUaAdvPHjkk1c+xYsd9oZw+YQQEV+10G0P5uMpGctZZKnyQ+ibRO08bD25nWLmYi2pw==
+
+immer@^10.1.1:
+  version "10.1.1"
+  resolved "https://registry.npmmirror.com/immer/-/immer-10.1.1.tgz#206f344ea372d8ea176891545ee53ccc062db7bc"
+  integrity sha512-s2MPrmjovJcoMaHtx6K11Ra7oD05NT97w1IC5zpMkT6Atjr7H8LjaDd81iIxUYpMKSRRNMJE703M1Fhr/TctHw==
 
 immutable@^4.0.0:
   version "4.3.5"

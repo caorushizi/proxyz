@@ -8,7 +8,7 @@ function handleMessage(
 ) {
   if (key === "getRequest" && val) {
     const reqs = requestCache.get(val);
-    sendResponse({ reqs });
+    sendResponse({ reqs: reqs ? [...reqs] : [] });
   }
 
   sendResponse({ status: "ok" });

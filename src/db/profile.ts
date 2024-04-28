@@ -1,11 +1,11 @@
 import { IDBPDatabase, openDB } from "idb";
-import { Profile } from "../helper/constant";
+import { ProfileType } from "../helper/constant";
 
-let db: IDBPDatabase<Profile> | null = null;
+let db: IDBPDatabase<ProfileType> | null = null;
 
 async function getDB() {
   if (!db) {
-    db = await openDB<Profile>("Proxyz", 1, {
+    db = await openDB<ProfileType>("Proxyz", 1, {
       upgrade(db) {
         const store = db.createObjectStore("profiles", {
           keyPath: "id",
@@ -18,7 +18,7 @@ async function getDB() {
   return db;
 }
 
-async function addProfile(profile: Omit<Profile, "id">): Promise<number> {
+async function addProfile(profile: Omit<ProfileType, "id">): Promise<number> {
   const db = await getDB();
   const id = await db.add("profiles", profile);
   return id as number;
@@ -34,7 +34,7 @@ async function findProfile(id: number) {
   return await db.get("profiles", id);
 }
 
-async function updateProfile(profile: Profile) {
+async function updateProfile(profile: ProfileType) {
   const db = await getDB();
   await db.put("profiles", profile);
 }

@@ -5,9 +5,9 @@ import {
 } from "@reduxjs/toolkit";
 import { RootState } from ".";
 import db from "../db/profile";
-import { Profile } from "../helper/constant";
+import { ProfileType } from "../helper/constant";
 
-const initialState: Profile[] = [];
+const initialState: ProfileType[] = [];
 
 const profilesSlice = createSlice({
   name: "profiles",
@@ -43,7 +43,7 @@ export const initProfiles = createAsyncThunk("posts/initProfiles", async () => {
 
 export const addProfile = createAsyncThunk(
   "posts/addProfile",
-  async (item: Omit<Profile, "id">) => {
+  async (item: Omit<ProfileType, "id">) => {
     const id = await db.addProfile(item);
     const profile = await db.findProfile(id);
     return profile;
@@ -52,7 +52,7 @@ export const addProfile = createAsyncThunk(
 
 export const updateProfile = createAsyncThunk(
   "posts/updateProfile",
-  async (item: Profile) => {
+  async (item: ProfileType) => {
     await db.updateProfile(item);
     return item;
   },

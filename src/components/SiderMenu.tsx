@@ -30,7 +30,12 @@ import {
 import ProxyIcon from "./ProxyIcon";
 import { useAppDispatch, useAppSelector } from "../hooks";
 import { addProfile, selectProfiles } from "../store/profilesSlice";
-import { Profile, basicForm } from "../helper/constant";
+import {
+  Profile,
+  ProfileType,
+  initialBypassList,
+  initialSingleProxy,
+} from "../helper/constant";
 
 const { Text } = Typography;
 
@@ -56,7 +61,7 @@ const useStyle = createStyles({
 });
 
 const SiderMenu: React.FC = () => {
-  const [form] = Form.useForm<Pick<Profile, "name" | "type">>();
+  const [form] = Form.useForm<Pick<ProfileType, "name" | "type">>();
   const { message } = App.useApp();
   const { styles } = useStyle();
   const profiles = useAppSelector(selectProfiles);
@@ -76,7 +81,7 @@ const SiderMenu: React.FC = () => {
 
   const renderAddForm = () => {
     return (
-      <ModalForm<Pick<Profile, "name" | "type">>
+      <ModalForm<Pick<ProfileType, "name" | "type">>
         title="新建情景模式"
         trigger={
           <Button size="small" type="text" icon={<PlusOutlined />}></Button>
@@ -91,17 +96,29 @@ const SiderMenu: React.FC = () => {
         }}
         submitTimeout={2000}
         onFinish={async (profile) => {
-          const color = generateUnlimitedMacaronColor();
-          dispatch(
-            addProfile({
-              ...profile,
-              color,
+          if (profile.type === ProxyMode.Proxy) {
+            const item: Omit<Profile<ProxyMode.Proxy>, "id"> = {
+              name: profile.name,
+              type: profile.type,
+              color: generateUnlimitedMacaronColor(),
               options: {
                 type: "basic",
-                rules: basicForm,
+                singleProxy: initialSingleProxy,
+                bypassList: initialBypassList,
               },
-            }),
-          );
+            };
+            dispatch(addProfile(item));
+          } else if (profile.type === ProxyMode.Auto) {
+            const item: Omit<Profile<ProxyMode.Auto>, "id"> = {
+              name: profile.name,
+              type: profile.type,
+              color: generateUnlimitedMacaronColor(),
+              options: {
+                rules: [],
+              },
+            };
+            dispatch(addProfile(item));
+          }
           message.success("添加成功");
           return true;
         }}

@@ -1,31 +1,34 @@
 import React from "react";
 import type { ProColumns } from "@ant-design/pro-components";
 import { DragSortTable } from "@ant-design/pro-components";
-import { Button, message } from "antd";
+import { Button, Space, message } from "antd";
 import { useState } from "react";
+import { useAppSelector } from "../../../hooks";
+import { selectProfiles } from "../../../store/profilesSlice";
+import ProxyIcon from "../../../components/ProxyIcon";
+import { ProxyMode } from "../../../helper";
 
 const data = [
   {
     key: 1,
-    name: "John Brown",
-    age: 32,
-    address: "New York No. 1 Lake Park",
-  },
-  {
-    key: 2,
-    name: "Jim Green",
-    age: 42,
-    address: "London No. 1 Lake Park",
-  },
-  {
-    key: 3,
-    name: "Joe Black",
-    age: 32,
-    address: "Sidney No. 1 Lake Park",
+    conditionType: "HostWildcardCondition",
+    pattern: "",
+    profileName: "",
   },
 ];
 
 const Auto = () => {
+  const [dataSource1, setDatasource1] = useState(data);
+  const profiles = useAppSelector(selectProfiles);
+  const handleDragSortEnd1 = (
+    beforeIndex: number,
+    afterIndex: number,
+    newDataSource: any,
+  ) => {
+    setDatasource1(newDataSource);
+    message.success("修改列表排序成功");
+  };
+
   const columns: ProColumns[] = [
     {
       title: "排序",
@@ -35,14 +38,14 @@ const Auto = () => {
     {
       title: "条件类型",
       tooltip: "这是一段描述",
-      dataIndex: "name",
+      dataIndex: "conditionType",
       className: "drag-visible",
       valueType: "select",
       valueEnum: {
-        direct: { text: "域名通配符", status: "direct" },
-        http: { text: "网址通配符", status: "http" },
-        https: { text: "网址正则", status: "https" },
-        sock4: { text: "（禁用）", status: "sock4" },
+        HostWildcardCondition: { text: "域名通配符", status: "" },
+        UrlWildcardCondition: { text: "网址通配符", status: "" },
+        UrlRegexCondition: { text: "网址正则", status: "" },
+        FalseCondition: { text: "（禁用）", status: "" },
       },
       fieldProps: {
         allowClear: false,
@@ -50,19 +53,35 @@ const Auto = () => {
     },
     {
       title: "条件设置",
-      dataIndex: "age",
+      dataIndex: "pattern",
     },
     {
       title: "情景模式",
-      dataIndex: "address",
+      dataIndex: "profileName",
       valueType: "select",
-      valueEnum: {
-        direct: { text: "直接连接", status: "direct" },
-        http: { text: "HTTP", status: "http" },
-        https: { text: "HTTPS", status: "https" },
-        sock4: { text: "SOCK4", status: "sock4" },
-        sock5: { text: "SOCK5", status: "sock5" },
-      },
+      valueEnum: [...profiles, "direct"].reduce<Map<string, React.ReactNode>>(
+        (prev, curr) => {
+          if (typeof curr === "string") {
+            prev.set(
+              "123",
+              <Space>
+                <ProxyIcon type={ProxyMode.Direct} />
+                直接连接
+              </Space>,
+            );
+            return prev;
+          }
+          prev.set(
+            curr.name,
+            <Space>
+              <ProxyIcon type={curr.type} color={curr.color} />
+              {curr.name}
+            </Space>,
+          );
+          return prev;
+        },
+        new Map(),
+      ),
       fieldProps: {
         allowClear: false,
       },
@@ -77,15 +96,6 @@ const Auto = () => {
       ],
     },
   ];
-  const [dataSource1, setDatasource1] = useState(data);
-  const handleDragSortEnd1 = (
-    beforeIndex: number,
-    afterIndex: number,
-    newDataSource: any,
-  ) => {
-    setDatasource1(newDataSource);
-    message.success("修改列表排序成功");
-  };
 
   return (
     <>

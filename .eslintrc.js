@@ -29,5 +29,6 @@ module.exports = {
   plugins: ["@typescript-eslint", "react"],
   rules: {
     "prettier/prettier": "error",
+    "@typescript-eslint/no-explicit-any": "warn",
   },
 };

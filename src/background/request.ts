@@ -8,6 +8,10 @@ const filter: chrome.webRequest.RequestFilter = {
 function beforeRequestHandler(
   details: chrome.webRequest.WebRequestBodyDetails,
 ) {
+  // 判断 url 以 http 或 https 开头
+  if (!/^https?:\/\//.test(details.url)) {
+    return;
+  }
   cache.set(details.requestId, {
     url: details.url,
     method: details.method,
@@ -16,16 +20,20 @@ function beforeRequestHandler(
     timestamp: details.timeStamp,
   });
 
-  setTimeout(() => {
+  setTimeout(async () => {
     const request = cache.get(details.requestId);
     if (request) {
-      chrome.action.setBadgeText({ text: "1", tabId: request.tabId });
       const tabReq = requestCache.get(request.tabId);
       if (tabReq) {
         tabReq.add(request);
       } else {
         requestCache.set(details.tabId, new Set([request]));
       }
+      const tab = requestCache.get(request.tabId);
+      await chrome.action.setBadgeText({
+        text: String(tab!.size),
+        tabId: request.tabId,
+      });
     }
   }, REQUEST_TIME_OUT);
 }
