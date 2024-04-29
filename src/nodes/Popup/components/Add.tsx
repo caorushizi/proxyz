@@ -1,67 +1,94 @@
-import {
-  Badge,
-  Button,
-  Checkbox,
-  Col,
-  Divider,
-  Row,
-  Space,
-  Typography,
-} from "antd";
-import React from "react";
-import { PageType, setPage, useHomeStateDispatch } from "../HomeContext";
+import { InfoCircleOutlined } from "@ant-design/icons";
+import { Button, Flex, Form, Input, Select, Typography } from "antd";
 import { createStyles, css } from "antd-style";
-import { LeftOutlined } from "@ant-design/icons";
+import React, { useState } from "react";
+import { useHomeState } from "../HomeContext";
+import ProxyIcon from "../../../components/ProxyIcon";
+import { ProxyMode } from "../../../helper";
+import PopupCard from "../../../components/PopupCard";
 
+const { Option } = Select;
 const { Text } = Typography;
 
 const useStyle = createStyles({
-  container: css`
-    width: 380px;
+  title: css`
+    margin-left: 5px;
+    font-size: 16px;
+    font-weight: 600;
   `,
 });
 
+type RequiredMark = boolean | "optional" | "customize";
+
 const Add = () => {
   const { styles } = useStyle();
-  const dispatch = useHomeStateDispatch();
+  const { profiles } = useHomeState();
+  const [form] = Form.useForm();
+  const [requiredMark, setRequiredMarkType] =
+    useState<RequiredMark>("optional");
+
+  const onRequiredTypeChange = ({
+    requiredMarkValue,
+  }: {
+    requiredMarkValue: RequiredMark;
+  }) => {
+    setRequiredMarkType(requiredMarkValue);
+  };
 
   return (
-    <div className={styles.container}>
-      <Space align="center">
-        <Button
-          onClick={() => {
-            dispatch(setPage(PageType.Home));
+    <PopupCard
+      header={<Text className={styles.title}>添加条件到情景模式</Text>}
+    >
+      <Form
+        form={form}
+        layout="vertical"
+        initialValues={{ requiredMarkValue: requiredMark }}
+        onValuesChange={onRequiredTypeChange}
+      >
+        <Form.Item label="条件类型" name="conditionType" required>
+          <Select placeholder="请选择条件类型">
+            <Option value="HostWildcardCondition">域名通配符</Option>
+            <Option value="UrlWildcardCondition">网址通配符</Option>
+            <Option value="UrlRegexCondition">网址正则</Option>
+            <Option value="FalseCondition">（禁用）</Option>
+          </Select>
+        </Form.Item>
+        <Form.Item
+          label="条件设置"
+          required
+          tooltip="This is a required field"
+          name="pattern"
+        >
+          <Input placeholder="请输入条件设置" />
+        </Form.Item>
+        <Form.Item
+          label="情景模式"
+          tooltip={{
+            title: "Tooltip with customize icon",
+            icon: <InfoCircleOutlined />,
           }}
-          type="text"
-          icon={<LeftOutlined />}
-        />
-        <Text>加载失败的资源列表</Text>
-      </Space>
-      <Divider style={{ margin: 0 }} />
-      <Text>
-        由于网络原因，此页面部分资源加载失败。这些问题可能是由您的网络、代理服务器或网站本身引起的。
-      </Text>
-      <Text>
-        这些问题并非由 SwitchyOmega 自身导致，它只不过检测并报告了错误而已。
-      </Text>
-      <Checkbox.Group style={{ width: "100%" }}>
-        <Row>
-          <Col span={24}>
-            <Checkbox value="A">
-              <Badge status="warning" count={5} />
-              *.baidu.com
-            </Checkbox>
-          </Col>
-          <Col span={24}>
-            <Checkbox value="A">
-              <Badge status="warning" count={5} />
-              *.baidu.com
-            </Checkbox>
-          </Col>
-        </Row>
-      </Checkbox.Group>
-      <Text>在使用自动切换情景时，才可以将这些资源添加为切换条件。</Text>
-    </div>
+          name="profileName"
+          required
+        >
+          <Select placeholder="请选择情景模式">
+            {profiles.map((profile) => (
+              <Option key={profile.id} value={profile.id}>
+                <ProxyIcon type={profile.type} color={profile.color} />
+                {profile.name}
+              </Option>
+            ))}
+            <Option key="direct" value="direct">
+              <ProxyIcon type={ProxyMode.Direct}></ProxyIcon>
+              [直接连接]
+            </Option>
+          </Select>
+        </Form.Item>
+        <Flex justify="space-between">
+          <Button>取消</Button>
+          <Button type="primary">添加条件</Button>
+        </Flex>
+      </Form>
+    </PopupCard>
   );
 };
 

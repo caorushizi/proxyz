@@ -56,13 +56,9 @@ async function init() {
   return Promise.all([getTabInfo(), getProfiles(), getActive()]);
 }
 
-const renderSkeleton = () => {
+const renderSkeleton = (width: number = 230) => {
   return (
-    <Space
-      direction="vertical"
-      style={{ width: 230, padding: 10 }}
-      size="large"
-    >
+    <Space direction="vertical" style={{ width, padding: 10 }} size="large">
       <Skeleton.Input size="large" active block />
       <Skeleton.Input size="large" active block />
       <Skeleton.Input size="large" active block />
@@ -108,12 +104,12 @@ const Popup = () => {
           </Suspense>
         )}
         {homeState.page === PageType.Unload && (
-          <Suspense fallback={renderSkeleton()}>
+          <Suspense fallback={renderSkeleton(380)}>
             <Unload />
           </Suspense>
         )}
         {homeState.page === PageType.Add && (
-          <Suspense fallback={renderSkeleton()}>
+          <Suspense fallback={renderSkeleton(380)}>
             <Add />
           </Suspense>
         )}

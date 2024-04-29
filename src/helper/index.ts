@@ -42,3 +42,11 @@ export function parseBypassList(text: string): BypassOption[] {
 export function formatBypassList(bypassList: BypassOption[]): string {
   return bypassList.map((item) => item.pattern).join("\n");
 }
+
+export function getWildcard(url: string) {
+  if (/^https?:\/\//.test(url)) {
+    const urlObj = new URL(url);
+    return urlObj.hostname.replace(/^[^.]+/, "*");
+  }
+  return null;
+}
