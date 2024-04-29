@@ -20,16 +20,20 @@ export function getMenuItem(
   } as MenuItem;
 }
 
-export function generateUnlimitedMacaronColor() {
-  function getRandomColorComponent() {
-    return Math.floor(Math.random() * 256);
+export function getMacaronColor(len?: number): string {
+  const colors = [
+    "#E74F4C",
+    "#ed9745",
+    "#E04C31",
+    "#7BD144",
+    "#4CCBCD",
+    "#4669EA",
+    "#E855A4",
+  ];
+  if (len) {
+    return colors[len % colors.length];
   }
-
-  const red = getRandomColorComponent();
-  const green = getRandomColorComponent();
-  const blue = getRandomColorComponent();
-
-  return `#${red.toString(16).padStart(2, "0")}${green.toString(16).padStart(2, "0")}${blue.toString(16).padStart(2, "0")}`;
+  return colors[Math.floor(Math.random() * colors.length)];
 }
 
 export function parseBypassList(text: string): BypassOption[] {
@@ -43,10 +47,11 @@ export function formatBypassList(bypassList: BypassOption[]): string {
   return bypassList.map((item) => item.pattern).join("\n");
 }
 
+// TODO: 获取泛域名
 export function getWildcard(url: string) {
   if (/^https?:\/\//.test(url)) {
     const urlObj = new URL(url);
-    return urlObj.hostname.replace(/^[^.]+/, "*");
+    return urlObj.hostname;
   }
   return null;
 }

@@ -24,7 +24,7 @@ async function addProfile(profile: Omit<ProfileType, "id">): Promise<number> {
   return id as number;
 }
 
-async function getProfiles() {
+async function getProfiles(): Promise<ProfileType[]> {
   const db = await getDB();
   return await db.getAll("profiles");
 }

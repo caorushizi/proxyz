@@ -35,14 +35,17 @@ const profilesSlice = createSlice({
 export const { todoAdded } = profilesSlice.actions;
 export const selectProfiles = (state: RootState) => state.profiles;
 
-export const initProfiles = createAsyncThunk("posts/initProfiles", async () => {
-  const profiles = await db.getProfiles();
-  await chrome.storage.local.set({ profiles });
-  return profiles;
-});
+export const initProfiles = createAsyncThunk(
+  "profiles/initProfiles",
+  async () => {
+    const profiles = await db.getProfiles();
+    await chrome.storage.local.set({ profiles });
+    return profiles;
+  },
+);
 
 export const addProfile = createAsyncThunk(
-  "posts/addProfile",
+  "profiles/addProfile",
   async (item: Omit<ProfileType, "id">) => {
     const id = await db.addProfile(item);
     const profile = await db.findProfile(id);
@@ -51,7 +54,7 @@ export const addProfile = createAsyncThunk(
 );
 
 export const updateProfile = createAsyncThunk(
-  "posts/updateProfile",
+  "profiles/updateProfile",
   async (item: ProfileType) => {
     await db.updateProfile(item);
     return item;

@@ -2,11 +2,9 @@ import { LeftOutlined, SettingOutlined } from "@ant-design/icons";
 import { Button, Divider, Flex } from "antd";
 import { createStyles, css } from "antd-style";
 import React, { FC } from "react";
-import {
-  PageType,
-  setPage,
-  useHomeStateDispatch,
-} from "../nodes/Popup/HomeContext";
+import { useAppDispatch } from "../hooks";
+import { setPage } from "../store/popupSlice";
+import { PopupPageType } from "../helper/constant";
 
 const useStyle = createStyles({
   container: css`
@@ -32,14 +30,14 @@ interface PopupCardProps {
 
 const PopupCard: FC<PopupCardProps> = ({ children, header }) => {
   const { styles } = useStyle();
-  const dispatch = useHomeStateDispatch();
+  const dispatch = useAppDispatch();
 
   return (
     <div className={styles.container}>
       <Flex align="center" className={styles.header}>
         <Button
           onClick={() => {
-            dispatch(setPage(PageType.Home));
+            dispatch(setPage(PopupPageType.PopupMenu));
           }}
           type="text"
           icon={<LeftOutlined />}

@@ -2,35 +2,63 @@ import React from "react";
 import { ProxyMode } from "../helper";
 import {
   GlobalOutlined,
-  RetweetOutlined,
   SnippetsOutlined,
   QuestionCircleOutlined,
   SwapOutlined,
+  PoweroffOutlined,
+  SyncOutlined,
 } from "@ant-design/icons";
+import { createStyles, css } from "antd-style";
+import clsx from "clsx";
 
 interface ProxyIconProps {
   type: ProxyMode;
   color?: string;
+  virtual?: boolean;
 }
 
-const ProxyIcon: React.FC<ProxyIconProps> = ({ type, color }) => {
+const useStyle = createStyles({
+  virtual: css`
+    position: relative;
+    &::before {
+      content: "";
+      display: block;
+      border-width: 1px;
+      border-style: dashed;
+      position: absolute;
+      top: -3px;
+      left: -3px;
+      right: -3px;
+      bottom: -3px;
+      border-radius: 4px;
+    }
+  `,
+});
+
+const ProxyIcon: React.FC<ProxyIconProps> = ({ type, color, virtual }) => {
+  const { styles } = useStyle();
+
+  const iconStyle = { color };
+  const iconClass = clsx({ [styles.virtual]: virtual });
+
   if (type === ProxyMode.Proxy) {
-    return <GlobalOutlined style={{ color }} />;
+    return <GlobalOutlined className={iconClass} style={iconStyle} />;
   }
   if (type === ProxyMode.Auto) {
-    return <RetweetOutlined style={{ color }} />;
+    return <SyncOutlined className={iconClass} style={iconStyle} />;
   }
   if (type === ProxyMode.PAC) {
-    return <SnippetsOutlined style={{ color }} />;
-  }
-  if (type === ProxyMode.Virtual) {
-    return <QuestionCircleOutlined style={{ color }} />;
+    return <SnippetsOutlined className={iconClass} style={iconStyle} />;
   }
   if (type === ProxyMode.Direct) {
-    return <SwapOutlined style={{ color }} />;
+    return <SwapOutlined className={iconClass} style={{ color: "#aaa" }} />;
   }
-
-  return null;
+  if (type === ProxyMode.System) {
+    return <PoweroffOutlined className={iconClass} style={{ color: "#000" }} />;
+  }
+  return (
+    <QuestionCircleOutlined className={styles.virtual} style={iconStyle} />
+  );
 };
 
 export default ProxyIcon;

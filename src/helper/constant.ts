@@ -83,6 +83,24 @@ export interface AutoProxyRule {
   profileName: number;
 }
 
+// direct
+export const initialDirect: Profile<ProxyMode.Direct> = {
+  id: -2,
+  name: "[直接连接]",
+  type: ProxyMode.Direct,
+  color: "#aaa",
+  options: [],
+};
+
+// system
+export const initialSystem: Profile<ProxyMode.System> = {
+  id: -1,
+  name: "[系统代理]",
+  type: ProxyMode.System,
+  color: "#aaa",
+  options: [],
+};
+
 export interface AutoProxyOptions {
   rules: AutoProxyRule[];
 }
@@ -111,3 +129,9 @@ export type ProfileType =
   | Profile<ProxyMode.Virtual>
   | Profile<ProxyMode.Direct>
   | Profile<ProxyMode.System>;
+
+export enum PopupPageType {
+  PopupMenu = "PopupMenu",
+  FailedToLoad = "FailedToLoad",
+  AddConditions = "AddConditions",
+}

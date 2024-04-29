@@ -10,11 +10,7 @@ import {
 } from "antd";
 import { createStyles, css } from "antd-style";
 import React from "react";
-import {
-  ProxyMode,
-  generateUnlimitedMacaronColor,
-  getMenuItem,
-} from "../helper";
+import { ProxyMode, getMacaronColor, getMenuItem } from "../helper";
 import { Link } from "react-router-dom";
 import {
   ModalForm,
@@ -60,6 +56,10 @@ const useStyle = createStyles({
   `,
 });
 
+function getLastProfileId(profiles: ProfileType[]): number {
+  return profiles.length > 0 ? profiles[profiles.length - 1].id : 0;
+}
+
 const SiderMenu: React.FC = () => {
   const [form] = Form.useForm<Pick<ProfileType, "name" | "type">>();
   const { message } = App.useApp();
@@ -96,11 +96,13 @@ const SiderMenu: React.FC = () => {
         }}
         submitTimeout={2000}
         onFinish={async (profile) => {
+          const lastId = getLastProfileId(profiles);
+          const color = getMacaronColor(lastId + 1);
           if (profile.type === ProxyMode.Proxy) {
             const item: Omit<Profile<ProxyMode.Proxy>, "id"> = {
               name: profile.name,
               type: profile.type,
-              color: generateUnlimitedMacaronColor(),
+              color,
               options: {
                 type: "basic",
                 singleProxy: initialSingleProxy,
@@ -112,9 +114,22 @@ const SiderMenu: React.FC = () => {
             const item: Omit<Profile<ProxyMode.Auto>, "id"> = {
               name: profile.name,
               type: profile.type,
-              color: generateUnlimitedMacaronColor(),
+              color,
               options: {
                 rules: [],
+              },
+            };
+            dispatch(addProfile(item));
+          } else {
+            // FIXME: 完成 PAC 和 Virtual 的添加
+            const item: Omit<Profile<any>, "id"> = {
+              name: profile.name,
+              type: profile.type,
+              color,
+              options: {
+                type: "basic",
+                singleProxy: initialSingleProxy,
+                bypassList: initialBypassList,
               },
             };
             dispatch(addProfile(item));
