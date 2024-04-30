@@ -30,6 +30,7 @@ import {
   Profile,
   ProfileType,
   initialBypassList,
+  initialPACText,
   initialSingleProxy,
 } from "../helper/constant";
 
@@ -120,16 +121,15 @@ const SiderMenu: React.FC = () => {
               },
             };
             dispatch(addProfileAction(item));
-          } else {
+          } else if (profile.type === ProxyMode.PAC) {
             // FIXME: 完成 PAC 和 Virtual 的添加
-            const item: Omit<Profile<any>, "id"> = {
+            const item: Omit<Profile<ProxyMode.PAC>, "id"> = {
               name: profile.name,
               type: profile.type,
               color,
               options: {
-                type: "basic",
-                singleProxy: initialSingleProxy,
-                bypassList: initialBypassList,
+                pacUrl: "",
+                pacText: initialPACText,
               },
             };
             dispatch(addProfileAction(item));

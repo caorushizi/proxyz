@@ -12,6 +12,7 @@ import {
 } from "../helper/constant";
 import {
   addProfile,
+  deleteProfile,
   findProfile,
   getProfiles,
   updateProfile,
@@ -45,6 +46,9 @@ const profilesSlice = createSlice({
           (profile) => profile.id === action.payload.id,
         );
         state[index] = action.payload;
+      })
+      .addCase(deleteProfileAction.fulfilled, (state, action) => {
+        return action.payload;
       });
   },
 });
@@ -67,6 +71,15 @@ export const addProfileAction = createAsyncThunk(
     const id = await addProfile(item);
     const profile = await findProfile(id);
     return profile;
+  },
+);
+
+export const deleteProfileAction = createAsyncThunk(
+  "profiles/deleteProfile",
+  async (id: number) => {
+    await deleteProfile(id);
+    const profiles = await getProfiles();
+    return profiles;
   },
 );
 

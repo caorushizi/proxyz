@@ -114,10 +114,18 @@ export interface AutoProxyOptions {
   rules: AutoProxyRule[];
 }
 
+// pac
+export interface PACOption {
+  pacUrl: string;
+  pacText: string;
+}
+
+export const initialPACText = `function FindProxyForURL(url, host) {\n\treturn "DIRECT";\n}\n`;
+
 export type ProxyMap = {
   [ProxyMode.Proxy]: ProxyOptions;
   [ProxyMode.Auto]: AutoProxyOptions;
-  [ProxyMode.PAC]: ProxyOption[];
+  [ProxyMode.PAC]: PACOption;
   [ProxyMode.Virtual]: ProxyOption[];
   [ProxyMode.Direct]: ProxyOption[];
   [ProxyMode.System]: ProxyOption[];

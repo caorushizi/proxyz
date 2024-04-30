@@ -12,6 +12,16 @@ import ProfilePage from "./nodes/ProfilePage";
 import "./assets/base.scss";
 import { store } from "./store";
 import { Provider } from "react-redux";
+import { loader } from "@monaco-editor/react";
+import * as monaco from "monaco-editor";
+// @ts-expect-error missing type
+import TSWorker from "url:monaco-editor/esm/vs/language/typescript/ts.worker";
+
+self.MonacoEnvironment = {
+  getWorkerUrl: () => TSWorker,
+};
+loader.config({ monaco });
+loader.init();
 
 const router = createHashRouter([
   {

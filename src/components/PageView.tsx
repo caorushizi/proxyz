@@ -12,13 +12,14 @@ const useStyle = createStyles({
     align-items: center;
     border-bottom: 1px solid #e8e8e8;
     padding: 10px;
+    height: 50px;
   `,
   title: css``,
   extra: css``,
   inner: css`
     padding: 10px;
     overflow: auto;
-    height: 100%;
+    height: calc(100% - 50px);
   `,
 });
 

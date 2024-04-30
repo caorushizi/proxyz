@@ -40,7 +40,6 @@ const PopupMenu: FC = () => {
         onClick: async () => {
           try {
             await setDirect(initialDirect.id);
-            window.close();
           } catch (e: any) {
             messageApi.error(e.message);
           }
@@ -53,7 +52,6 @@ const PopupMenu: FC = () => {
         onClick: async () => {
           try {
             await setSystem(initialSystem.id);
-            window.close();
           } catch (e: any) {
             messageApi.error(e.message);
           }
@@ -69,7 +67,6 @@ const PopupMenu: FC = () => {
         onClick: async () => {
           try {
             await setProfile(profile);
-            window.close();
           } catch (e: any) {
             messageApi.error(e.message);
           }

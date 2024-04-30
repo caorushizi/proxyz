@@ -36,6 +36,11 @@ export async function findProfile(id: number) {
   return await db.get("profiles", id);
 }
 
+export async function deleteProfile(id: number) {
+  const db = await getDB();
+  await db.delete("profiles", id);
+}
+
 export async function updateProfile(profile: ProfileType) {
   const db = await getDB();
   await db.put("profiles", profile);

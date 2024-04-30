@@ -1,5 +1,6 @@
 import { minimatch } from "minimatch";
 
+// https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Proxy_servers_and_tunneling/Proxy_Auto-Configuration_PAC_file
 const autoHost = globalThis.__REPLACE_HOST__;
 const auto = (host: string) => autoHost.some((url) => minimatch(host, url));
 const proxy = (host: string) => {
