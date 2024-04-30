@@ -1,4 +1,5 @@
-import db from "../db/profile";
+import { getProfiles } from "../db/profile";
+import { initialSystem } from "../helper/constant";
 
 const canvas = new OffscreenCanvas(16, 16);
 const context = canvas.getContext("2d");
@@ -29,14 +30,27 @@ export function getIcon(outer: string, inner?: string) {
   return context.getImageData(0, 0, 16, 16);
 }
 
+export async function setIcon(outer: string, inner?: string) {
+  await chrome.action.setIcon({
+    imageData: getIcon(outer, inner),
+  });
+}
+
+export const directColor = "#aaa";
+export const systemColor = "#000";
+
 async function init() {
-  const profiles = await db.getProfiles();
+  await setIcon(systemColor);
+
+  const profiles = await getProfiles();
   const { activeId } = await chrome.storage.local.get("activeId");
-  const activeProfile = profiles.find((profile) => profile.id === activeId);
+  const activeProfile = profiles.find((i) => `${i.id}` === activeId);
   if (activeProfile) {
-    chrome.action.setIcon({
-      imageData: getIcon(activeProfile.color),
-    });
+    await setIcon(activeProfile.color);
+  } else if (`${initialSystem.id}` === activeId) {
+    await setIcon(systemColor);
+  } else {
+    await setIcon(directColor);
   }
 }
 

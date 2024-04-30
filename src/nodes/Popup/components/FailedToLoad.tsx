@@ -1,4 +1,13 @@
-import { Badge, Button, Checkbox, Col, Row, Select, Typography } from "antd";
+import {
+  Badge,
+  Button,
+  Checkbox,
+  Col,
+  Form,
+  Row,
+  Select,
+  Typography,
+} from "antd";
 import { createStyles, css } from "antd-style";
 import React from "react";
 import { ProxyMode, getWildcard } from "../../../helper";
@@ -9,7 +18,17 @@ import {
   selectActiveProfile,
   selectPopupState,
 } from "../../../store/popupSlice";
-import { selectProfiles } from "../../../store/profilesSlice";
+import {
+  addAutoConditionAction,
+  selectProfiles,
+} from "../../../store/profilesSlice";
+import { useAsyncEffect } from "ahooks";
+import localforage from "localforage";
+import { useAppDispatch } from "../../../hooks";
+import { AutoProxyRule } from "../../../helper/constant";
+import useChrome from "../../../hooks/chrome";
+import { findProfile } from "../../../db/profile";
+import { v4 as uuidv4 } from "uuid";
 
 const { Paragraph, Text } = Typography;
 
@@ -50,13 +69,34 @@ function groupByDomain(resources: string[]) {
   return group;
 }
 
+interface FormValues {
+  domains: string[];
+  profileId: number;
+}
+
 const FailedToLoad = () => {
   const { styles } = useStyle();
   const { resources } = useSelector(selectPopupState);
   const activeProfile = useSelector(selectActiveProfile);
   const profiles = useSelector(selectProfiles);
+  const [form] = Form.useForm<FormValues>();
+  const dispatch = useAppDispatch();
+  const { setProfile } = useChrome();
 
   const group = groupByDomain(resources);
+
+  useAsyncEffect(async () => {
+    const lastProfileId = await localforage.getItem<number>("lastProfileId");
+    const hasCurrentProfile = profiles.find((i) => i.id === lastProfileId);
+    if (lastProfileId && hasCurrentProfile) {
+      form.setFieldsValue({
+        profileId: lastProfileId,
+      });
+    }
+    form.setFieldsValue({
+      domains: Object.keys(group),
+    });
+  }, []);
 
   const renderItem = (domain: string, count: number) => {
     return (
@@ -69,6 +109,31 @@ const FailedToLoad = () => {
         <Text className={styles.checkBoxText}>{domain}</Text>
       </div>
     );
+  };
+
+  const onSubmit = async () => {
+    if (!activeProfile) return;
+    await form.validateFields();
+    const { profileId, domains } = form.getFieldsValue();
+    const { id } = activeProfile;
+    const rules: AutoProxyRule[] = domains.map((domain) => ({
+      id: uuidv4(),
+      conditionType: "HostWildcardCondition",
+      pattern: domain,
+      profileId,
+    }));
+    await dispatch(addAutoConditionAction({ id, rules })).unwrap();
+    const [tab] = await chrome.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+    if (!tab.id) return;
+    const profile = await findProfile(id);
+    await localforage.setItem("lastProfileId", profileId);
+    await setProfile(profile);
+    await chrome.tabs.reload(tab.id);
+    // 关闭窗口
+    window.close();
   };
 
   return (
@@ -86,49 +151,67 @@ const FailedToLoad = () => {
         </Text>
       </Paragraph>
       {activeProfile?.type === ProxyMode.Auto && (
-        <>
-          <Checkbox.Group
-            className={styles.checkBox}
-            defaultValue={Object.keys(group)}
+        <Form form={form}>
+          <Form.Item
+            name="domains"
+            required
+            rules={[
+              {
+                required: true,
+                message: "请选择域名",
+              },
+            ]}
           >
-            <Row>
-              {Object.entries(group).map(([domain, count]) => (
-                <Col span={24} key={domain} className={styles.checkBoxWrapper}>
-                  <Checkbox value={domain}>
-                    {renderItem(domain, count)}
-                  </Checkbox>
-                </Col>
-              ))}
-            </Row>
-          </Checkbox.Group>
-          <Text>对所有选中的域名使用此情景模式：</Text>
-          <Row gutter={10}>
-            <Col span={16}>
-              <Select
-                placeholder="请选择情景模式"
-                // value={selectedItems}
-                // onChange={setSelectedItems}
-                style={{ width: "100%" }}
-                options={profiles
-                  .filter(
-                    (profile) =>
-                      profile.type !== ProxyMode.System &&
-                      profile.type !== ProxyMode.Auto,
-                  )
-                  .map((item) => ({
-                    value: item.id,
-                    label: <SelectItem profile={item} />,
-                  }))}
-              />
-            </Col>
-            <Col span={8}>
-              <Button block type="primary">
-                添加条件
-              </Button>
-            </Col>
-          </Row>
-        </>
+            <Checkbox.Group className={styles.checkBox}>
+              <Row>
+                {Object.entries(group).map(([domain, count]) => (
+                  <Col
+                    span={24}
+                    key={domain}
+                    className={styles.checkBoxWrapper}
+                  >
+                    <Checkbox value={domain}>
+                      {renderItem(domain, count)}
+                    </Checkbox>
+                  </Col>
+                ))}
+              </Row>
+            </Checkbox.Group>
+          </Form.Item>
+          <Form.Item
+            name="profileId"
+            label="对所有选中的域名使用此情景模式："
+            required
+            rules={[
+              {
+                required: true,
+                message: "请选择情景模式",
+              },
+            ]}
+          >
+            <Select
+              placeholder="请选择情景模式"
+              style={{ width: "100%" }}
+              options={profiles
+                .filter(
+                  (profile) =>
+                    profile.type !== ProxyMode.System &&
+                    profile.type !== ProxyMode.Auto,
+                )
+                .map((item) => ({
+                  value: item.id,
+                  label: <SelectItem profile={item} />,
+                }))}
+            />
+          </Form.Item>
+          <Form.Item>
+            <Button block type="primary" onClick={onSubmit}>
+              添加条件
+            </Button>
+          </Form.Item>
+        </Form>
       )}
+
       {activeProfile?.type !== ProxyMode.Auto && (
         <>
           {Object.entries(group).map(([domain, count]) =>

@@ -1,6 +1,7 @@
 export { ProxyMode } from "./constant";
 import type { MenuProps } from "antd";
 import { BypassOption } from "./constant";
+import { getDomain } from "tldjs";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -22,6 +23,11 @@ export function getMenuItem(
 
 export function getMacaronColor(len?: number): string {
   const colors = [
+    "#99ccee",
+    "#99dd99",
+    "#ffaa88",
+    "#ffee99",
+    "#d497ee",
     "#E74F4C",
     "#ed9745",
     "#E04C31",
@@ -49,9 +55,5 @@ export function formatBypassList(bypassList: BypassOption[]): string {
 
 // TODO: 获取泛域名
 export function getWildcard(url: string) {
-  if (/^https?:\/\//.test(url)) {
-    const urlObj = new URL(url);
-    return urlObj.hostname;
-  }
-  return null;
+  return `*.${getDomain(url)}`;
 }

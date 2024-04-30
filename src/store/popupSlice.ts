@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { RootState } from ".";
 import { PopupPageType } from "../helper/constant";
+import { invoke } from "../hooks/chrome";
 
 export interface PopupState {
   page: PopupPageType;
@@ -53,10 +54,8 @@ async function getTabInfo() {
   }
 
   if (tab.id) {
-    const { reqs } = await chrome.runtime.sendMessage({
-      getRequest: tab.id,
-    });
-    tabInfo.resources = (reqs || []).map((req: any) => req.url);
+    const res = await invoke({ message: "getFailResources", params: tab.id });
+    tabInfo.resources = res;
   }
   return tabInfo;
 }

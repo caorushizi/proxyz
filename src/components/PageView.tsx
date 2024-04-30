@@ -17,6 +17,8 @@ const useStyle = createStyles({
   extra: css``,
   inner: css`
     padding: 10px;
+    overflow: auto;
+    height: 100%;
   `,
 });
 

@@ -7,12 +7,14 @@ const options = {
   max: 500,
 };
 
-export const cache = new LRUCache<string, RequestDetails>(options);
-export const requestCache = new LRUCache<number, Set<RequestDetails>>(options);
+export const requestsCache = new LRUCache<string, RequestDetails>(options);
+export const failedResourceCache = new LRUCache<number, Set<string>>(options);
 
 export type Events = {
-  changeProxy: ProfileType;
   direct: boolean;
+  setDirect: void;
+  setSystem: void;
+  setProfile: ProfileType;
 };
 
 export const emitter: Emitter<Events> = mitt();
@@ -33,4 +35,20 @@ export function error(...args: unknown[]) {
   if (process.env.NODE_ENV === "development") {
     console.error(`[ERROR] `, ...args);
   }
+}
+
+export function success(data?: any) {
+  return {
+    status: 0,
+    message: "success",
+    data,
+  };
+}
+
+export function fail(message: string) {
+  return {
+    status: 1,
+    message,
+    data: null,
+  };
 }

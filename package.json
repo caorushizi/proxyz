@@ -20,6 +20,8 @@
     "@types/node": "^20.12.7",
     "@types/react": "^18.2.79",
     "@types/react-dom": "^18.2.25",
+    "@types/tldjs": "^2.3.4",
+    "@types/uuid": "^9.0.8",
     "@typescript-eslint/eslint-plugin": "^7.7.1",
     "@typescript-eslint/parser": "^7.7.1",
     "buffer": "^6.0.3",
@@ -36,7 +38,8 @@
     "stream-browserify": "^3.0.0",
     "stylelint": "^16.4.0",
     "stylelint-config-standard": "^36.0.0",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "url": "^0.11.0"
   },
   "lint-staged": {
     "*.ts": [
@@ -66,6 +69,8 @@
     "react-dom": "^18.2.0",
     "react-redux": "^9.1.1",
     "react-router-dom": "^6.23.0",
-    "sort-by": "^1.2.0"
+    "sort-by": "^1.2.0",
+    "tldjs": "^2.3.1",
+    "uuid": "^9.0.1"
   }
 }

@@ -18,30 +18,25 @@ async function getDB() {
   return db;
 }
 
-async function addProfile(profile: Omit<ProfileType, "id">): Promise<number> {
+export async function addProfile(
+  profile: Omit<ProfileType, "id">,
+): Promise<number> {
   const db = await getDB();
   const id = await db.add("profiles", profile);
   return id as number;
 }
 
-async function getProfiles(): Promise<ProfileType[]> {
+export async function getProfiles(): Promise<ProfileType[]> {
   const db = await getDB();
   return await db.getAll("profiles");
 }
 
-async function findProfile(id: number) {
+export async function findProfile(id: number) {
   const db = await getDB();
   return await db.get("profiles", id);
 }
 
-async function updateProfile(profile: ProfileType) {
+export async function updateProfile(profile: ProfileType) {
   const db = await getDB();
   await db.put("profiles", profile);
 }
-
-export default {
-  addProfile,
-  getProfiles,
-  findProfile,
-  updateProfile,
-};

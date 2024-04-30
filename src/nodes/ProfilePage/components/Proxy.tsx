@@ -21,9 +21,9 @@ import {
   initialSingleProxy,
 } from "../../../helper/constant";
 import { useAppDispatch } from "../../../hooks";
-import { updateProfile } from "../../../store/profilesSlice";
 import { produce } from "immer";
 import { formatBypassList, parseBypassList } from "../../../helper";
+import { updateProfileAction } from "../../../store/profilesSlice";
 
 const { Title, Text } = Typography;
 
@@ -168,7 +168,7 @@ const Proxy: FC<ProxyProps> = ({ profile }) => {
     setColumns(
       ["scheme", "host", "port", "option"].map((col) => columnsMap[col]),
     );
-    dispatch(updateProfile(nextState));
+    dispatch(updateProfileAction(nextState));
   }
 
   function setAdvanceProxy(props?: SetProxyProps) {
@@ -221,7 +221,7 @@ const Proxy: FC<ProxyProps> = ({ profile }) => {
         (col) => columnsMap[col],
       ),
     );
-    dispatch(updateProfile(nextState));
+    dispatch(updateProfileAction(nextState));
   }
 
   useEffect(() => {

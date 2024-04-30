@@ -3,7 +3,7 @@ import React, { Suspense, lazy, useEffect } from "react";
 import { initPopup, selectPopupState } from "../../store/popupSlice";
 import { useAppDispatch, useAppSelector } from "../../hooks";
 import { PopupPageType } from "../../helper/constant";
-import { initProfiles } from "../../store/profilesSlice";
+import { initProfilesAction } from "../../store/profilesSlice";
 
 const PopupMenu = lazy(() => import("./components/PopupMenu"));
 const FailedToLoad = lazy(() => import("./components/FailedToLoad"));
@@ -25,7 +25,7 @@ const Popup = () => {
   const popupState = useAppSelector(selectPopupState);
 
   useEffect(() => {
-    dispatch(initProfiles());
+    dispatch(initProfilesAction());
     dispatch(initPopup());
   }, []);
 

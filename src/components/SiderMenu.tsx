@@ -25,7 +25,7 @@ import {
 } from "@ant-design/icons";
 import ProxyIcon from "./ProxyIcon";
 import { useAppDispatch, useAppSelector } from "../hooks";
-import { addProfile, selectProfiles } from "../store/profilesSlice";
+import { addProfileAction, selectProfiles } from "../store/profilesSlice";
 import {
   Profile,
   ProfileType,
@@ -109,7 +109,7 @@ const SiderMenu: React.FC = () => {
                 bypassList: initialBypassList,
               },
             };
-            dispatch(addProfile(item));
+            dispatch(addProfileAction(item));
           } else if (profile.type === ProxyMode.Auto) {
             const item: Omit<Profile<ProxyMode.Auto>, "id"> = {
               name: profile.name,
@@ -119,7 +119,7 @@ const SiderMenu: React.FC = () => {
                 rules: [],
               },
             };
-            dispatch(addProfile(item));
+            dispatch(addProfileAction(item));
           } else {
             // FIXME: 完成 PAC 和 Virtual 的添加
             const item: Omit<Profile<any>, "id"> = {
@@ -132,7 +132,7 @@ const SiderMenu: React.FC = () => {
                 bypassList: initialBypassList,
               },
             };
-            dispatch(addProfile(item));
+            dispatch(addProfileAction(item));
           }
           message.success("添加成功");
           return true;

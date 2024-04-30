@@ -77,10 +77,19 @@ export interface ProxyOptions {
 // =====
 
 // auto
+
+export type ConditionType =
+  | "HostWildcardCondition"
+  | "HostRegexCondition"
+  | "UrlWildcardCondition"
+  | "UrlRegexCondition"
+  | "FalseCondition";
+
 export interface AutoProxyRule {
-  conditionType: string;
+  id: string;
+  conditionType: ConditionType;
   pattern: string;
-  profileName: number;
+  profileId: number;
 }
 
 // direct

@@ -1,7 +1,7 @@
 import pacScript from "bundle-text:./pac";
-
-import { emitter, info } from "./utils";
-import { Profile, ProxyMode } from "../helper/constant";
+import { info } from "./utils";
+import { Profile, ProfileType, ProxyMode } from "../helper/constant";
+import { directColor, setIcon, systemColor } from "./icon";
 
 async function setProxy(profile: Profile<ProxyMode.Proxy>) {
   const { options } = profile;
@@ -35,13 +35,16 @@ async function setProxy(profile: Profile<ProxyMode.Proxy>) {
   await chrome.proxy.settings.set({ value: config, scope: "regular" });
 }
 
-async function setPAC() {
+async function setPAC(profile: Profile<ProxyMode.Auto>) {
+  const { options } = profile;
+  const { rules } = options;
+  const rulesList = rules.map((rule) => rule.pattern);
   const config = {
     mode: "pac_script",
     pacScript: {
       data: pacScript.replace(
         /globalThis.__REPLACE_HOST__/g,
-        JSON.stringify([]),
+        JSON.stringify(rulesList),
       ),
       mandatory: true,
     },
@@ -54,27 +57,25 @@ async function clearProxy() {
   await chrome.proxy.settings.clear({ scope: "regular" });
 }
 
-async function init() {
-  emitter.on("changeProxy", async (profile) => {
-    if (profile.type === ProxyMode.Proxy) {
-      await setProxy(profile);
-    } else if (profile.type === ProxyMode.PAC) {
-      await setPAC();
-    } else if (profile.type === ProxyMode.Auto) {
-      await setPAC();
-    } else if (profile.type === ProxyMode.Direct) {
-      await clearProxy();
-    } else if (profile.type === ProxyMode.System) {
-      // await clearProxy();
-    } else if (profile.type === ProxyMode.Virtual) {
-      // await clearProxy();
-    }
-  });
-  emitter.on("direct", async (direct) => {
-    if (direct) {
-      await clearProxy();
-    }
-  });
+export async function setDirect() {
+  await setIcon(directColor);
+  await clearProxy();
 }
+
+export async function setSystem() {
+  await setIcon(systemColor);
+  await clearProxy();
+}
+
+export async function setProfile(profile: ProfileType) {
+  await setIcon(profile.color);
+  if (profile.type === ProxyMode.Proxy) {
+    await setProxy(profile);
+  } else if (profile.type === ProxyMode.Auto) {
+    await setPAC(profile);
+  }
+}
+
+async function init() {}
 
 export default init;

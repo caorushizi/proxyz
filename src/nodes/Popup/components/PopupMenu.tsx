@@ -1,4 +1,4 @@
-import { Menu, MenuProps } from "antd";
+import { Menu, MenuProps, message } from "antd";
 import React, { FC } from "react";
 import {
   FilterOutlined,
@@ -17,17 +17,19 @@ import { useSelector } from "react-redux";
 import {
   selectActiveProfile,
   selectPopupState,
-  setActiveId,
   setPage,
 } from "../../../store/popupSlice";
 import { useAppDispatch } from "../../../hooks";
 import { selectProfiles } from "../../../store/profilesSlice";
+import useChrome from "../../../hooks/chrome";
 
 const PopupMenu: FC = () => {
   const dispatch = useAppDispatch();
   const { activeId, resources, currUrl } = useSelector(selectPopupState);
   const profiles = useSelector(selectProfiles);
   const activeProfile = useSelector(selectActiveProfile);
+  const { setDirect, setSystem, setProfile } = useChrome();
+  const [messageApi, contextHolder] = message.useMessage();
 
   const renderItems = () => {
     const items: MenuProps["items"] = [
@@ -35,34 +37,26 @@ const PopupMenu: FC = () => {
         label: initialDirect.name,
         key: initialDirect.id,
         icon: <ProxyIcon type={initialDirect.type} />,
-        onClick: async ({ key }: { key: string }) => {
-          dispatch(setActiveId(key));
-
-          await chrome.storage.local.set({
-            activeId: key,
-          });
-
-          await chrome.runtime.sendMessage({
-            direct: true,
-          });
-          return;
+        onClick: async () => {
+          try {
+            await setDirect(initialDirect.id);
+            window.close();
+          } catch (e: any) {
+            messageApi.error(e.message);
+          }
         },
       },
       {
         label: initialSystem.name,
         key: initialSystem.id,
         icon: <ProxyIcon type={initialSystem.type} />,
-        onClick: async ({ key }: any) => {
-          dispatch(setActiveId(key));
-
-          await chrome.storage.local.set({
-            activeId: key,
-          });
-
-          await chrome.runtime.sendMessage({
-            direct: true,
-          });
-          return;
+        onClick: async () => {
+          try {
+            await setSystem(initialSystem.id);
+            window.close();
+          } catch (e: any) {
+            messageApi.error(e.message);
+          }
         },
       },
     ];
@@ -72,20 +66,12 @@ const PopupMenu: FC = () => {
         label: profile.name,
         key: `${profile.id}`,
         icon: <ProxyIcon type={profile.type} color={profile.color} />,
-        onClick: async ({ key }: any) => {
-          const profile = profiles.find(
-            (profile) => profile.id === Number(key),
-          );
-          if (profile) {
-            dispatch(setActiveId(String(profile.id)));
-            await chrome.storage.local.set({
-              activeId: profile.id,
-            });
-            chrome.runtime.sendMessage({ changeProxy: profile });
-          } else {
-            if (process.env.NODE_ENV !== "production") {
-              console.warn("未找到配置文件");
-            }
+        onClick: async () => {
+          try {
+            await setProfile(profile);
+            window.close();
+          } catch (e: any) {
+            messageApi.error(e.message);
           }
         },
       })),
@@ -145,12 +131,15 @@ const PopupMenu: FC = () => {
   };
 
   return (
-    <Menu
-      style={{ width: 230 }}
-      items={renderItems()}
-      selectedKeys={[String(activeId)]}
-      mode="inline"
-    />
+    <>
+      {contextHolder}
+      <Menu
+        style={{ width: 230 }}
+        items={renderItems()}
+        selectedKeys={[String(activeId)]}
+        mode="inline"
+      />
+    </>
   );
 };
 

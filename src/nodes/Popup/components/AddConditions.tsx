@@ -12,6 +12,7 @@ import {
   selectPopupState,
 } from "../../../store/popupSlice";
 import { selectProfiles } from "../../../store/profilesSlice";
+import { getWildcard } from "../../../helper";
 
 const { Option } = Select;
 const { Text } = Typography;
@@ -41,6 +42,7 @@ const AddConditions = () => {
   const [form] = Form.useForm<FormValues>();
 
   const onSubmit = async () => {
+    await form.validateFields();
     const values = form.getFieldsValue();
 
     await localforage.setItem("lastProfileId", values.profileId);
@@ -48,9 +50,11 @@ const AddConditions = () => {
 
   useAsyncEffect(async () => {
     const lastProfileId = await localforage.getItem<number>("lastProfileId");
-    if (lastProfileId) {
+    const lastProfile = profiles.find((i) => i.id === lastProfileId);
+    if (lastProfileId && lastProfile) {
       form.setFieldsValue({
         profileId: lastProfileId,
+        pattern: getWildcard(currUrl),
       });
     }
   }, []);

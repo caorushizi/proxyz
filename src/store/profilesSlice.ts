@@ -4,8 +4,19 @@ import {
   createSelector,
 } from "@reduxjs/toolkit";
 import { RootState } from ".";
-import db from "../db/profile";
-import { ProfileType } from "../helper/constant";
+import {
+  AutoProxyRule,
+  Profile,
+  ProfileType,
+  ProxyMode,
+} from "../helper/constant";
+import {
+  addProfile,
+  findProfile,
+  getProfiles,
+  updateProfile,
+} from "../db/profile";
+import { produce } from "immer";
 
 const initialState: ProfileType[] = [];
 
@@ -17,13 +28,19 @@ const profilesSlice = createSlice({
   },
   extraReducers(builder) {
     builder
-      .addCase(initProfiles.fulfilled, (state, action) => {
+      .addCase(initProfilesAction.fulfilled, (state, action) => {
         return action.payload;
       })
-      .addCase(addProfile.fulfilled, (state, action) => {
+      .addCase(addProfileAction.fulfilled, (state, action) => {
         state.push(action.payload);
       })
-      .addCase(updateProfile.fulfilled, (state, action) => {
+      .addCase(updateProfileAction.fulfilled, (state, action) => {
+        const index = state.findIndex(
+          (profile) => profile.id === action.payload.id,
+        );
+        state[index] = action.payload;
+      })
+      .addCase(addAutoConditionAction.fulfilled, (state, action) => {
         const index = state.findIndex(
           (profile) => profile.id === action.payload.id,
         );
@@ -35,28 +52,40 @@ const profilesSlice = createSlice({
 export const { todoAdded } = profilesSlice.actions;
 export const selectProfiles = (state: RootState) => state.profiles;
 
-export const initProfiles = createAsyncThunk(
+export const initProfilesAction = createAsyncThunk(
   "profiles/initProfiles",
   async () => {
-    const profiles = await db.getProfiles();
+    const profiles = await getProfiles();
     await chrome.storage.local.set({ profiles });
     return profiles;
   },
 );
 
-export const addProfile = createAsyncThunk(
+export const addProfileAction = createAsyncThunk(
   "profiles/addProfile",
   async (item: Omit<ProfileType, "id">) => {
-    const id = await db.addProfile(item);
-    const profile = await db.findProfile(id);
+    const id = await addProfile(item);
+    const profile = await findProfile(id);
     return profile;
   },
 );
 
-export const updateProfile = createAsyncThunk(
+export const addAutoConditionAction = createAsyncThunk(
+  "profiles/addAutoCondition",
+  async ({ rules, id }: { rules: AutoProxyRule[]; id: number }) => {
+    const profile = await findProfile(id);
+    const nextProfile = produce<Profile<ProxyMode.Auto>>(profile, (draft) => {
+      draft.options.rules.push(...rules);
+    });
+    await updateProfile(nextProfile);
+    return nextProfile;
+  },
+);
+
+export const updateProfileAction = createAsyncThunk(
   "profiles/updateProfile",
   async (item: ProfileType) => {
-    await db.updateProfile(item);
+    await updateProfile(item);
     return item;
   },
 );

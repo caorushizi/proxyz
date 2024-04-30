@@ -26,7 +26,7 @@ const Mode: React.FC = () => {
     }
 
     if (profile.type === ProxyMode.Auto) {
-      return <Auto />;
+      return <Auto profile={profile} />;
     }
 
     if (profile.type === ProxyMode.Virtual) {
@@ -45,10 +45,11 @@ const Mode: React.FC = () => {
       title={
         <Space>
           <ColorPicker defaultValue={profile?.color} />
-          情景模式 {JSON.stringify(profile)}
+          情景模式
         </Space>
       }
     >
+      {JSON.stringify(profile)}
       {renderProfile()}
     </PageView>
   );

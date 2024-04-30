@@ -1,5 +1,13 @@
 import { REQUEST_TIME_OUT } from "./const";
-import { cache, requestCache } from "./utils";
+import { failedResourceCache, requestsCache } from "./utils";
+
+export function getFailResources(tabId: number) {
+  const tab = failedResourceCache.get(tabId);
+  if (tab) {
+    return [...tab];
+  }
+  return [];
+}
 
 const filter: chrome.webRequest.RequestFilter = {
   urls: ["<all_urls>"],
@@ -12,7 +20,7 @@ function beforeRequestHandler(
   if (!/^https?:\/\//.test(details.url)) {
     return;
   }
-  cache.set(details.requestId, {
+  requestsCache.set(details.requestId, {
     url: details.url,
     method: details.method,
     requestId: details.requestId,
@@ -21,41 +29,41 @@ function beforeRequestHandler(
   });
 
   setTimeout(async () => {
-    const request = cache.get(details.requestId);
-    if (request) {
-      const tabReq = requestCache.get(request.tabId);
-      if (tabReq) {
-        tabReq.add(request);
-      } else {
-        requestCache.set(details.tabId, new Set([request]));
-      }
-      const tab = requestCache.get(request.tabId);
-      await chrome.action.setBadgeText({
-        text: String(tab!.size),
-        tabId: request.tabId,
-      });
+    const request = requestsCache.get(details.requestId);
+    if (!request) {
+      return;
     }
+
+    const tabReq = failedResourceCache.get(request.tabId) || new Set();
+    tabReq.add(request.url);
+
+    await chrome.action.setBadgeText({
+      text: `${tabReq.size}`,
+      tabId: request.tabId,
+    });
+
+    failedResourceCache.set(request.tabId, tabReq);
   }, REQUEST_TIME_OUT);
 }
 
 function completedHandler(details: chrome.webRequest.WebResponseCacheDetails) {
-  cache.delete(details.requestId);
+  requestsCache.delete(details.requestId);
 }
 
 function errorHandler(details: chrome.webRequest.WebResponseErrorDetails) {
-  cache.delete(details.requestId);
+  requestsCache.delete(details.requestId);
 }
 
 function redirectHandler(
   details: chrome.webRequest.WebRedirectionResponseDetails,
 ) {
-  cache.delete(details.requestId);
+  requestsCache.delete(details.requestId);
 }
 
 function headersReceivedHandler(
   details: chrome.webRequest.WebResponseHeadersDetails,
 ) {
-  cache.delete(details.requestId);
+  requestsCache.delete(details.requestId);
 }
 
 function init() {

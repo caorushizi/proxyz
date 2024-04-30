@@ -4,8 +4,8 @@ import { createStyles, css } from "antd-style";
 import { Outlet } from "react-router-dom";
 import SiderMenu from "../components/SiderMenu";
 import { useAsyncEffect } from "ahooks";
-import { initProfiles } from "../store/profilesSlice";
 import { useAppDispatch } from "../hooks";
+import { initProfilesAction } from "../store/profilesSlice";
 
 const useStyle = createStyles({
   container: css`
@@ -28,7 +28,7 @@ const Options: FC = () => {
   const dispatch = useAppDispatch();
 
   useAsyncEffect(async () => {
-    dispatch(initProfiles());
+    dispatch(initProfilesAction());
   });
 
   return (
