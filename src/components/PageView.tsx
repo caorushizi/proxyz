@@ -4,6 +4,8 @@ import clsx from "clsx";
 
 const useStyle = createStyles({
   container: css`
+    display: flex;
+    flex-direction: column;
     height: 100vh;
   `,
   header: css`
@@ -14,20 +16,24 @@ const useStyle = createStyles({
     padding: 10px;
     height: 50px;
   `,
-  title: css``,
-  extra: css``,
   inner: css`
     padding: 10px;
     overflow: auto;
-    height: calc(100% - 50px);
+    flex: 1;
+  `,
+  footer: css`
+    padding: 10px;
+    flex-shrink: 0;
   `,
 });
 
 interface PageViewProps {
   children: React.ReactNode;
   className?: string;
+  wrapperClassName?: string;
   title: React.ReactNode;
   extra?: React.ReactNode;
+  footer?: React.ReactNode;
 }
 
 const PageView: React.FC<PageViewProps> = ({
@@ -35,16 +41,19 @@ const PageView: React.FC<PageViewProps> = ({
   className,
   title,
   extra,
+  wrapperClassName,
+  footer,
 }) => {
   const { styles } = useStyle();
 
   return (
-    <div className={clsx([styles.container, className])}>
+    <div className={clsx([styles.container, wrapperClassName])}>
       <div className={styles.header}>
-        <div className={styles.title}>{title}</div>
+        <div>{title}</div>
         <div>{extra}</div>
       </div>
-      <div className={styles.inner}>{children}</div>
+      <div className={clsx([styles.inner, className])}>{children}</div>
+      {footer && <div className={styles.footer}>{footer}</div>}
     </div>
   );
 };

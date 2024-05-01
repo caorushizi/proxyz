@@ -2,12 +2,11 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import "antd/dist/reset.css";
 import Options from "./layout/Options";
-import { ConfigProvider, App } from "antd";
+import { ConfigProvider } from "antd";
 import zhCN from "antd/locale/zh_CN";
 import { createHashRouter, RouterProvider } from "react-router-dom";
-import Interface from "./nodes/Interface";
-import General from "./nodes/General";
-import Export from "./nodes/Export";
+import Settings from "./nodes/Settings";
+import About from "./nodes/About";
 import ProfilePage from "./nodes/ProfilePage";
 import "./assets/base.scss";
 import { store } from "./store";
@@ -30,15 +29,11 @@ const router = createHashRouter([
     children: [
       {
         path: "/",
-        element: <Interface />,
+        element: <About />,
       },
       {
-        path: "/general",
-        element: <General />,
-      },
-      {
-        path: "/export",
-        element: <Export />,
+        path: "/Settings",
+        element: <Settings />,
       },
       {
         path: "/profile/:id",
@@ -53,9 +48,7 @@ root.render(
   <React.StrictMode>
     <ConfigProvider locale={zhCN}>
       <Provider store={store}>
-        <App>
-          <RouterProvider router={router} />
-        </App>
+        <RouterProvider router={router} />
       </Provider>
     </ConfigProvider>
   </React.StrictMode>,

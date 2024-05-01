@@ -1,7 +1,13 @@
 import pacScript from "bundle-text:./pac";
 import { info } from "./utils";
-import { Profile, ProfileType, ProxyMode } from "../helper/constant";
-import { directColor, setIcon, systemColor } from "./icon";
+import {
+  Profile,
+  ProfileType,
+  ProxyMode,
+  initialDirect,
+  initialSystem,
+} from "../helper/constant";
+import { setIcon } from "./icon";
 
 async function setProxy(profile: Profile<ProxyMode.Proxy>) {
   const { options } = profile;
@@ -58,12 +64,12 @@ async function clearProxy() {
 }
 
 export async function setDirect() {
-  await setIcon(directColor);
+  await setIcon(initialDirect.color);
   await clearProxy();
 }
 
 export async function setSystem() {
-  await setIcon(systemColor);
+  await setIcon(initialSystem.color);
   await clearProxy();
 }
 

@@ -1,5 +1,4 @@
 import {
-  App,
   Button,
   Flex,
   Form,
@@ -7,21 +6,21 @@ import {
   MenuProps,
   Space,
   Typography,
+  message,
 } from "antd";
 import { createStyles, css } from "antd-style";
-import React from "react";
-import { ProxyMode, getMacaronColor, getMenuItem } from "../helper";
-import { Link } from "react-router-dom";
+import React, { useEffect } from "react";
+import { ProxyMode, getMacaronColor } from "../helper";
+import { Link, useLocation } from "react-router-dom";
 import {
   ModalForm,
   ProFormRadio,
   ProFormText,
 } from "@ant-design/pro-components";
 import {
-  ToolOutlined,
   SettingOutlined,
-  SaveOutlined,
   PlusOutlined,
+  InfoCircleOutlined,
 } from "@ant-design/icons";
 import ProxyIcon from "./ProxyIcon";
 import { useAppDispatch, useAppSelector } from "../hooks";
@@ -30,6 +29,7 @@ import {
   Profile,
   ProfileType,
   initialBypassList,
+  initialDirect,
   initialPACText,
   initialSingleProxy,
 } from "../helper/constant";
@@ -63,10 +63,22 @@ function getLastProfileId(profiles: ProfileType[]): number {
 
 const SiderMenu: React.FC = () => {
   const [form] = Form.useForm<Pick<ProfileType, "name" | "type">>();
-  const { message } = App.useApp();
+  const [messageApi, contextHolder] = message.useMessage();
   const { styles } = useStyle();
+  const [selectedKey, setSelectedKey] = React.useState<string[]>();
   const profiles = useAppSelector(selectProfiles);
   const dispatch = useAppDispatch();
+  const location = useLocation();
+
+  useEffect(() => {
+    const path = location.pathname;
+    const match = path.match(/profile\/(\d+)/);
+    if (match) {
+      setSelectedKey([match[1]]);
+    } else {
+      setSelectedKey([path]);
+    }
+  }, [location.pathname]);
 
   const renderDesc = (icon: React.ReactNode, title: string, desc: string) => {
     return (
@@ -133,8 +145,18 @@ const SiderMenu: React.FC = () => {
               },
             };
             dispatch(addProfileAction(item));
+          } else if (profile.type === ProxyMode.Virtual) {
+            const item: Omit<Profile<ProxyMode.Virtual>, "id"> = {
+              name: profile.name,
+              type: profile.type,
+              color,
+              options: {
+                profileId: initialDirect.id,
+              },
+            };
+            dispatch(addProfileAction(item));
           }
-          message.success("添加成功");
+          messageApi.success("添加成功");
           return true;
         }}
         layout="vertical"
@@ -200,53 +222,64 @@ const SiderMenu: React.FC = () => {
     );
   };
 
-  const items: MenuProps["items"] = [
-    getMenuItem(
-      "设定",
-      "setting",
-      null,
-      [
-        getMenuItem(<Link to={"/"}>界面</Link>, "tool", <ToolOutlined />),
-        getMenuItem(
-          <Link to={"/general"}>通用</Link>,
-          "setting",
-          <SettingOutlined />,
-        ),
-        getMenuItem(
-          <Link to={"export"}>导入/导出</Link>,
-          "export",
-          <SaveOutlined />,
-        ),
-      ],
-      "group",
-    ),
-    { type: "divider" },
+  const renderMenuItem = (): MenuProps["items"] => {
+    if (!profiles.length) {
+      return [
+        {
+          label: <Text type="secondary">暂无情景模式</Text>,
+          key: "no-profile",
+          disabled: true,
+        },
+      ];
+    }
+    return profiles.map((profile) => ({
+      label: <Link to={`profile/${profile.id}`}>{profile.name}</Link>,
+      key: profile.id,
+      icon: <ProxyIcon type={profile.type} color={profile.color} />,
+    }));
+  };
 
-    getMenuItem(
-      <Flex align="center" justify="space-between">
-        情景模式
-        {renderAddForm()}
-      </Flex>,
-      "mode",
-      null,
-      profiles.map((profile) =>
-        getMenuItem(
-          <Link to={`profile/${profile.id}`}>{profile.name}</Link>,
-          profile.id,
-          <ProxyIcon type={profile.type} color={profile.color} />,
-        ),
+  const items: MenuProps["items"] = [
+    {
+      label: (
+        <Flex align="center" justify="space-between">
+          情景模式
+          {renderAddForm()}
+        </Flex>
       ),
-      "group",
-    ),
+      key: "profile-group",
+      children: renderMenuItem(),
+      type: "group",
+    },
+    { type: "divider" },
+    {
+      label: "设置",
+      key: "setting-group",
+      children: [
+        {
+          label: <Link to={"/settings"}>设置</Link>,
+          key: "/settings",
+          icon: <SettingOutlined />,
+        },
+        {
+          label: <Link to={"/"}>关于</Link>,
+          key: "/",
+          icon: <InfoCircleOutlined />,
+        },
+      ],
+      type: "group",
+    },
   ];
   return (
-    <Menu
-      className={styles.menu}
-      defaultSelectedKeys={["1"]}
-      defaultOpenKeys={["sub1"]}
-      mode="inline"
-      items={items}
-    />
+    <>
+      {contextHolder}
+      <Menu
+        className={styles.menu}
+        selectedKeys={selectedKey}
+        mode="inline"
+        items={items}
+      />
+    </>
   );
 };
 

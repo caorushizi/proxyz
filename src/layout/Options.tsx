@@ -1,11 +1,12 @@
 import React, { FC } from "react";
 import { Layout } from "antd";
 import { createStyles, css } from "antd-style";
-import { Outlet } from "react-router-dom";
+import { Link, Outlet } from "react-router-dom";
 import SiderMenu from "../components/SiderMenu";
 import { useAsyncEffect } from "ahooks";
 import { useAppDispatch } from "../hooks";
 import { initProfilesAction } from "../store/profilesSlice";
+import { name } from "../../package.json";
 
 const useStyle = createStyles({
   container: css`
@@ -14,10 +15,15 @@ const useStyle = createStyles({
   `,
   header: css`
     background: #fff;
+    padding: 8px 16px 0;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
   `,
   sider: css`
     background: #fff;
     border-right: 1px solid #e8e8e8;
+    overflow: auto;
   `,
 });
 
@@ -34,7 +40,9 @@ const Options: FC = () => {
   return (
     <Layout className={styles.container}>
       <Sider theme="light" className={styles.sider}>
-        <h1 className={styles.header}>Proxyz</h1>
+        <div className={styles.header}>
+          <Link to={"/"}>{name.toUpperCase()}</Link>
+        </div>
         <SiderMenu />
       </Sider>
       <Content>

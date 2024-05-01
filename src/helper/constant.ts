@@ -122,13 +122,18 @@ export interface PACOption {
 
 export const initialPACText = `function FindProxyForURL(url, host) {\n\treturn "DIRECT";\n}\n`;
 
+// 虚拟
+export interface VirtualOption {
+  profileId: number;
+}
+
 export type ProxyMap = {
   [ProxyMode.Proxy]: ProxyOptions;
   [ProxyMode.Auto]: AutoProxyOptions;
   [ProxyMode.PAC]: PACOption;
-  [ProxyMode.Virtual]: ProxyOption[];
-  [ProxyMode.Direct]: ProxyOption[];
-  [ProxyMode.System]: ProxyOption[];
+  [ProxyMode.Virtual]: VirtualOption;
+  [ProxyMode.Direct]: [];
+  [ProxyMode.System]: [];
 };
 
 export interface Profile<T extends ProxyMode = ProxyMode.Proxy> {

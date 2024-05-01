@@ -1,6 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Sample Web Extension",
+  "description": "Sample Web Extension",
   "version": "0.0.1",
   "background": {
     "service_worker": "background/index.ts",
@@ -15,6 +16,6 @@
     "default_popup": "popup.html",
     "default_icon": {}
   },
-  "permissions": ["storage", "proxy", "webRequest", "tabs"],
+  "permissions": ["storage", "proxy", "webRequest", "tabs", "action"],
   "host_permissions": ["<all_urls>"]
 }

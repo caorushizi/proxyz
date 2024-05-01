@@ -1,8 +1,7 @@
-import React, { FC } from "react";
+import React, { FC, useEffect } from "react";
 import type { ProColumns } from "@ant-design/pro-components";
-import { DragSortTable } from "@ant-design/pro-components";
-import { Button, message } from "antd";
-import { useState } from "react";
+import { DragSortTable, ProForm } from "@ant-design/pro-components";
+import { Button, Form, message } from "antd";
 import { useAppDispatch, useAppSelector } from "../../../hooks";
 import {
   selectProfiles,
@@ -12,6 +11,7 @@ import { ProxyMode } from "../../../helper";
 import {
   AutoProxyRule,
   Profile,
+  ProfileType,
   initialDirect,
 } from "../../../helper/constant";
 import SelectItem from "../../../components/SelectItem";
@@ -28,23 +28,17 @@ function getTableData(profile: Profile<ProxyMode.Auto>) {
   return rules;
 }
 
-const Auto: FC<AutoProps> = ({ profile }) => {
-  const [table, setTable] = useState<AutoProxyRule[]>(getTableData(profile));
-  const profiles = useAppSelector(selectProfiles);
-  const dispatch = useAppDispatch();
-  const [messageApi, contextHolder] = message.useMessage();
+interface DragSortTableItemProps {
+  value?: AutoProxyRule[];
+  onChange?: (value: AutoProxyRule[]) => void;
+  profiles: ProfileType[];
+}
 
-  const handleDragSortEnd = (beforeIndex: number, afterIndex: number) => {
-    const nextState = produce(profile, (draft) => {
-      const [removed] = draft.options.rules.splice(beforeIndex, 1);
-      draft.options.rules.splice(afterIndex, 0, removed);
-    });
-    dispatch(updateProfileAction(nextState));
-    setTable(getTableData(nextState));
-
-    messageApi.success("修改列表排序成功");
-  };
-
+const DragSortTableItem: FC<DragSortTableItemProps> = ({
+  value = [],
+  onChange = () => {},
+  profiles,
+}) => {
   const columns: ProColumns[] = [
     {
       title: "排序",
@@ -75,7 +69,9 @@ const Auto: FC<AutoProps> = ({ profile }) => {
       title: "情景模式",
       dataIndex: "profileId",
       valueType: "select",
-      valueEnum: [...profiles, initialDirect].reduce((prev, curr) => {
+      valueEnum: [...profiles, initialDirect].reduce<
+        Map<number, React.ReactNode>
+      >((prev, curr) => {
         prev.set(curr.id, <SelectItem profile={curr} />);
         return prev;
       }, new Map()),
@@ -89,69 +85,116 @@ const Auto: FC<AutoProps> = ({ profile }) => {
     },
   ];
 
-  const onDeleteRow = (row: AutoProxyRule) => {
-    const nextState = produce(profile, (draft) => {
-      const index = draft.options.rules.findIndex((item) => item.id === row.id);
-      draft.options.rules.splice(index, 1);
+  const handleDragSortEnd = (beforeIndex: number, afterIndex: number) => {
+    const nextState = produce(value, (draft) => {
+      const [removed] = draft.splice(beforeIndex, 1);
+      draft.splice(afterIndex, 0, removed);
     });
-    dispatch(updateProfileAction(nextState));
-    setTable(getTableData(nextState));
+    onChange && onChange(nextState);
+  };
+
+  const onDeleteRow = (row: AutoProxyRule) => {
+    const nextState = produce(value, (draft) => {
+      const index = draft.findIndex((item) => item.id === row.id);
+      draft.splice(index, 1);
+    });
+    onChange && onChange(nextState);
+  };
+
+  const onTableValuesChange = (record: AutoProxyRule) => {
+    const nextState = produce(value, (draft) => {
+      const { id, ...rest } = record;
+      const index = draft.findIndex((item) => item.id === id);
+      draft[index] = {
+        ...draft[index],
+        ...rest,
+      };
+    });
+    onChange && onChange(nextState);
   };
 
   return (
-    <>
+    <DragSortTable<AutoProxyRule>
+      headerTitle="切换规则"
+      scroll={{
+        x: 960,
+      }}
+      columns={columns}
+      rowKey="id"
+      search={false}
+      pagination={false}
+      dataSource={value}
+      dragSortKey="sort"
+      onDragSortEnd={handleDragSortEnd}
+      editable={{
+        type: "multiple",
+        onlyOneLineEditorAlertMessage: "只能编辑一行",
+        editableKeys: value.map((item) => item.id),
+        onValuesChange: onTableValuesChange,
+        actionRender: (row) => {
+          return [
+            <Button
+              type="text"
+              key="delete"
+              danger
+              icon={<DeleteOutlined />}
+              onClick={() => onDeleteRow(row)}
+            />,
+          ];
+        },
+      }}
+      footer={() => {
+        return (
+          <Button block type="dashed">
+            添加条件
+          </Button>
+        );
+      }}
+    />
+  );
+};
+
+interface FormProps {
+  rules: AutoProxyRule[];
+}
+
+const Auto: FC<AutoProps> = ({ profile }) => {
+  const profiles = useAppSelector(selectProfiles);
+  const dispatch = useAppDispatch();
+  const [messageApi, contextHolder] = message.useMessage();
+  const [form] = Form.useForm<FormProps>();
+
+  useEffect(() => {
+    form.setFieldsValue({
+      rules: getTableData(profile),
+    });
+  }, []);
+
+  const onFinish = (values: FormProps) => {
+    dispatch(
+      updateProfileAction({
+        ...profile,
+        options: {
+          rules: values.rules,
+        },
+      }),
+    );
+    messageApi.success("保存成功");
+  };
+
+  return (
+    <ProForm
+      form={form}
+      initialValues={{
+        rules: [],
+      }}
+      onFinish={onFinish}
+    >
       {contextHolder}
-      <DragSortTable<AutoProxyRule>
-        headerTitle="切换规则"
-        scroll={{
-          x: 960,
-        }}
-        columns={columns}
-        rowKey="id"
-        search={false}
-        pagination={false}
-        dataSource={table}
-        dragSortKey="sort"
-        onDragSortEnd={handleDragSortEnd}
-        editable={{
-          type: "multiple",
-          onlyOneLineEditorAlertMessage: "只能编辑一行",
-          editableKeys: table.map((item) => item.id),
-          onValuesChange(record) {
-            const nextState = produce(profile, (draft) => {
-              const { id, ...rest } = record;
-              const index = draft.options.rules.findIndex(
-                (item) => item.id === id,
-              );
-              draft.options.rules[index] = {
-                ...draft.options.rules[index],
-                ...rest,
-              };
-            });
-            dispatch(updateProfileAction(nextState));
-            setTable(getTableData(nextState));
-          },
-          actionRender: (row) => {
-            return [
-              <Button
-                type="text"
-                key="delete"
-                danger
-                icon={<DeleteOutlined />}
-                onClick={() => onDeleteRow(row)}
-              />,
-            ];
-          },
-        }}
-        footer={() => {
-          return (
-            <Button block type="dashed">
-              添加条件
-            </Button>
-          );
-        }}
-      />
-    </>
+      <ProForm.Item name="rules">
+        <DragSortTableItem profiles={profiles} />
+      </ProForm.Item>
+    </ProForm>
   );
 };
 

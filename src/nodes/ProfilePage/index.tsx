@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import PageView from "../../components/PageView";
 import { Button, ColorPicker, Modal, Space } from "antd";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../hooks";
 import {
   deleteProfileAction,
@@ -14,21 +14,23 @@ import Virtual from "./components/Virtual";
 import PAC from "./components/PAC";
 import { DeleteOutlined, ExclamationCircleFilled } from "@ant-design/icons";
 import SelectItem from "../../components/SelectItem";
+import { ProfileType } from "../../helper/constant";
 
 const { confirm } = Modal;
 
 const Mode: React.FC = () => {
   const { id = "" } = useParams();
-  const profile = useAppSelector((state) =>
-    selectProfileById(state, Number(id)),
-  );
+  const profile = useAppSelector((state) => selectProfileById(state, id));
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
-  const renderProfile = () => {
+  useEffect(() => {
     if (!profile) {
-      return <div>请先选择一个情景模式</div>;
+      navigate("/");
     }
+  }, []);
 
+  const renderProfile = (profile: ProfileType) => {
     if (profile.type === ProxyMode.Proxy) {
       return <Proxy profile={profile} />;
     }
@@ -38,7 +40,7 @@ const Mode: React.FC = () => {
     }
 
     if (profile.type === ProxyMode.Virtual) {
-      return <Virtual />;
+      return <Virtual profile={profile} />;
     }
 
     if (profile.type === ProxyMode.PAC) {
@@ -48,55 +50,53 @@ const Mode: React.FC = () => {
     return <div>未知情景模式</div>;
   };
 
+  // 如果没有profile，返回null
+  if (!profile) return null;
+
+  const onDelete = () => {
+    confirm({
+      title: "真的要删除这个情景模式吗？",
+      icon: <ExclamationCircleFilled />,
+      content: <SelectItem profile={profile} />,
+      okText: "删除",
+      okButtonProps: { type: "primary" },
+      okType: "danger",
+      cancelText: "取消",
+      onOk() {
+        dispatch(deleteProfileAction(profile.id));
+      },
+      onCancel() {},
+    });
+  };
+
+  const renderTitle = () => {
+    return (
+      <Space>
+        <ColorPicker value={profile.color} />
+        情景模式：{profile.name}
+      </Space>
+    );
+  };
+
+  const renderExtra = () => {
+    return (
+      <Space>
+        <Button
+          type="primary"
+          danger
+          icon={<DeleteOutlined />}
+          onClick={onDelete}
+        >
+          删除
+        </Button>
+      </Space>
+    );
+  };
+
+  // 如果有profile，返回页面
   return (
-    <PageView
-      title={
-        <Space>
-          <ColorPicker defaultValue={profile?.color} />
-          情景模式
-        </Space>
-      }
-      extra={
-        <Space>
-          {profile && (
-            <Button
-              type="primary"
-              danger
-              icon={<DeleteOutlined />}
-              onClick={() => {
-                confirm({
-                  title: "真的要删除这个情景模式吗？",
-                  icon: <ExclamationCircleFilled />,
-                  content: <SelectItem profile={profile} />,
-                  okText: "删除",
-                  okButtonProps: { type: "primary" },
-                  okType: "danger",
-                  cancelText: "取消",
-                  onOk() {
-                    dispatch(deleteProfileAction(profile.id));
-                  },
-                  onCancel() {},
-                });
-              }}
-            >
-              删除
-            </Button>
-          )}
-        </Space>
-      }
-    >
-      {renderProfile()}
-      <div
-        style={{
-          height: 100,
-          overflow: "auto",
-          border: "1px solid #000",
-          padding: 10,
-          marginTop: 30,
-        }}
-      >
-        {JSON.stringify(profile)}
-      </div>
+    <PageView title={renderTitle()} extra={renderExtra()}>
+      {renderProfile(profile)}
     </PageView>
   );
 };

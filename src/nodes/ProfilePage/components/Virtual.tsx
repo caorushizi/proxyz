@@ -1,134 +1,92 @@
-import { DownOutlined, PlusOutlined, UserOutlined } from "@ant-design/icons";
-import { Button, Dropdown, Form, MenuProps, Space, message } from "antd";
-import React from "react";
-import { ModalForm, ProForm, ProFormText } from "@ant-design/pro-components";
+import { Button, Form, message } from "antd";
+import React, { FC, ReactNode, useEffect } from "react";
+import { ProForm, ProFormSelect } from "@ant-design/pro-components";
+import { Profile, ProxyMode, initialDirect } from "../../../helper/constant";
+import { useAppDispatch, useAppSelector } from "../../../hooks";
+import {
+  selectProfiles,
+  updateProfileAction,
+} from "../../../store/profilesSlice";
+import SelectItem from "../../../components/SelectItem";
+import { produce } from "immer";
 
-type FieldType = {
-  username?: string;
-  password?: string;
-  remember?: string;
-};
+interface VirtualProps {
+  profile: Profile<ProxyMode.Virtual>;
+}
 
-const items: MenuProps["items"] = [
-  {
-    label: "1st menu item",
-    key: "1",
-    icon: <UserOutlined />,
-  },
-  {
-    label: "2nd menu item",
-    key: "2",
-    icon: <UserOutlined />,
-  },
-  {
-    label: "3rd menu item",
-    key: "3",
-    icon: <UserOutlined />,
-    danger: true,
-  },
-  {
-    label: "4rd menu item",
-    key: "4",
-    icon: <UserOutlined />,
-    danger: true,
-    disabled: true,
-  },
-];
+interface VirtualForm {
+  profileId: string;
+}
 
-const handleMenuClick: MenuProps["onClick"] = () => {
-  message.info("Click on menu item.");
-};
+const Virtual: FC<VirtualProps> = ({ profile }) => {
+  const [form] = Form.useForm<VirtualForm>();
+  const profiles = useAppSelector(selectProfiles);
+  const [messageApi, contextHolder] = message.useMessage();
+  const dispatch = useAppDispatch();
 
-const menuProps = {
-  items,
-  onClick: handleMenuClick,
-};
+  useEffect(() => {
+    form.setFieldsValue({
+      profileId: String(profile.options.profileId),
+    });
+  }, []);
 
-const waitTime = (time: number = 100) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(true);
-    }, time);
-  });
-};
+  const selectOptions = [...profiles, initialDirect]
+    .filter((i) => i.type !== ProxyMode.Virtual && i.type !== ProxyMode.Auto)
+    .map((i) => ({
+      label: <SelectItem profile={i} />,
+      value: i.id,
+    }))
+    .reduce<Record<string, ReactNode>>((acc, cur) => {
+      acc[cur.value] = cur.label;
+      return acc;
+    }, {});
 
-const Virtual = () => {
-  const [form] = Form.useForm<{ name: string; company: string }>();
+  const onFinish = (values: VirtualForm) => {
+    const nextState = produce(profile, (draft) => {
+      draft.options.profileId = Number(values.profileId);
+    });
+    dispatch(updateProfileAction(nextState));
+    messageApi.success("保存成功");
+  };
 
   return (
-    <Form
-      name="basic"
-      initialValues={{}}
-      autoComplete="off"
-      onChange={() => {}}
-      layout="vertical"
-    >
-      <Form.Item<FieldType>
-        label="虚拟情景模式"
-        name="username"
-        tooltip="当使用此情景模式时，相当于使用了以下情景模式："
-        rules={[{ required: true, message: "Please input your username!" }]}
+    <>
+      {contextHolder}
+      <ProForm<VirtualForm>
+        form={form}
+        autoComplete="off"
+        onFinish={onFinish}
+        layout="vertical"
       >
-        目标
-        <Dropdown menu={menuProps}>
-          <Button>
-            <Space>
-              Button
-              <DownOutlined />
-            </Space>
-          </Button>
-        </Dropdown>
-      </Form.Item>
-
-      <Form.Item<FieldType>
-        label="PAC 脚本"
-        rules={[{ required: true, message: "Please input your password!" }]}
-        name="password"
-        tooltip="通过此功能可以更改现有的选项，使用此虚情景模式来取代 。此功能会把所有和 相关的切换规则改为使用此虚情景模式。这样一来，就可以通过此虚情景模式来控制那些切换条件对应的结果。"
-      >
-        <ModalForm<{
-          name: string;
-          company: string;
-        }>
-          title="新建表单"
-          trigger={
-            <Button type="primary">
-              <PlusOutlined />
-              新建表单
-            </Button>
-          }
-          form={form}
-          autoFocusFirstInput
-          modalProps={{
-            destroyOnClose: true,
-            onCancel: () => {},
-          }}
-          submitTimeout={2000}
-          onFinish={async () => {
-            await waitTime(2000);
-            message.success("提交成功");
-            return true;
-          }}
-        >
-          <ProForm.Group>
-            <ProFormText
-              width="md"
-              name="name"
-              label="签约客户名称"
-              tooltip="最长为 24 位"
-              placeholder="请输入名称"
-            />
-
-            <ProFormText
-              width="md"
-              name="company"
-              label="我方公司名称"
-              placeholder="请输入名称"
-            />
-          </ProForm.Group>
-        </ModalForm>
-      </Form.Item>
-    </Form>
+        <ProFormSelect
+          name="profileId"
+          label="虚拟情景模式"
+          tooltip="当使用此情景模式时，相当于使用了以下情景模式："
+          valueEnum={selectOptions}
+          placeholder="请选择虚拟情景模式"
+          rules={[{ required: true, message: "请选择虚拟情景模式" }]}
+          required
+          allowClear={false}
+        />
+      </ProForm>
+      <div>
+        <div>一键替换情景模式</div>
+        <div>
+          通过此功能可以更改现有的选项，使用此虚情景模式来取代
+          。此功能会把所有和
+          相关的切换规则改为使用此虚情景模式。这样一来，就可以通过此虚情景模式来控制那些切换条件对应的结果。
+        </div>
+        <div>您确定要使用 oProfile 来代替 吗?</div>
+        <div> proxy1 {">"} 虚情景模式</div>
+        <div>
+          如果继续操作，则和 proxy1 有关的切换规则将改为使用 虚情景模式
+          来代替。此外，启动情景模式、快速切换等设置也会做相应调整。但请注意，此操作不影响这两个情景模式本身。
+        </div>
+        <div>
+          <Button>替换</Button>
+        </div>
+      </div>
+    </>
   );
 };
 

@@ -104,9 +104,9 @@ export const updateProfileAction = createAsyncThunk(
 );
 
 export const selectProfileById = createSelector(
-  [(state: RootState) => state.profiles, (_, id: number) => id],
+  [(state: RootState) => state.profiles, (_, id: string | number) => id],
   (state, id) => {
-    return state.find((profile) => profile.id === id);
+    return state.find((i) => `${i.id}` === `${id}`);
   },
 );
 

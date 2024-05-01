@@ -27,16 +27,17 @@ interface EditorProps {
   value?: string;
   onChange?: (value: string) => void;
 }
-const EditorWrapper: FC<EditorProps> = ({ value, onChange }) => {
+const EditorWrapper: FC<EditorProps> = ({
+  value = "",
+  onChange = () => {},
+}) => {
   return (
     <Editor
       height="300px"
       theme="vs-dark"
       language="javascript"
       value={value}
-      onChange={(value) => {
-        onChange && onChange(value || "");
-      }}
+      onChange={(value) => onChange(value || "")}
     />
   );
 };
@@ -47,13 +48,15 @@ interface TextProps {
   onFetch: (url: string) => Promise<void>;
   loading: boolean;
 }
-const TextWrapper: FC<TextProps> = ({ value, onChange, onFetch, loading }) => {
+const TextWrapper: FC<TextProps> = ({
+  value = "",
+  onChange = () => {},
+  onFetch,
+  loading,
+}) => {
   return (
     <Space.Compact block>
-      <Input
-        value={value}
-        onChange={(e) => onChange && onChange(e.target.value)}
-      />
+      <Input value={value} onChange={(e) => onChange(e.target.value)} />
       <Button
         type="primary"
         icon={<DownloadOutlined />}
@@ -70,6 +73,7 @@ const PAC: FC<PACProps> = ({ profile }) => {
   const [form] = Form.useForm();
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(false);
+  const [messageApi, contextHolder] = message.useMessage();
 
   return (
     <ProForm<PACForm>
@@ -83,6 +87,7 @@ const PAC: FC<PACProps> = ({ profile }) => {
         dispatch(updateProfileAction(nextState));
       }}
     >
+      {contextHolder}
       <ProForm.Item name="pacUrl" label="PAC 网址">
         <TextWrapper
           loading={loading}
@@ -92,7 +97,7 @@ const PAC: FC<PACProps> = ({ profile }) => {
               const text = await fetchPAC(url);
               form.setFieldValue("pacText", text);
             } catch (e: any) {
-              message.error(e.message);
+              messageApi.error(e.message);
             }
             setLoading(false);
           }}

@@ -1,5 +1,5 @@
 import { getProfiles } from "../db/profile";
-import { initialSystem } from "../helper/constant";
+import { initialDirect, initialSystem } from "../helper/constant";
 
 const canvas = new OffscreenCanvas(16, 16);
 const context = canvas.getContext("2d");
@@ -36,11 +36,8 @@ export async function setIcon(outer: string, inner?: string) {
   });
 }
 
-export const directColor = "#aaa";
-export const systemColor = "#000";
-
 async function init() {
-  await setIcon(systemColor);
+  await setIcon(initialSystem.color);
 
   const profiles = await getProfiles();
   const { activeId } = await chrome.storage.local.get("activeId");
@@ -48,9 +45,9 @@ async function init() {
   if (activeProfile) {
     await setIcon(activeProfile.color);
   } else if (`${initialSystem.id}` === activeId) {
-    await setIcon(systemColor);
+    await setIcon(initialSystem.color);
   } else {
-    await setIcon(directColor);
+    await setIcon(initialDirect.color);
   }
 }
 

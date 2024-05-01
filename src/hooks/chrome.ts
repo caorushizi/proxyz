@@ -32,15 +32,17 @@ export default function useChrome() {
 
   // 设置直接连接
   async function setDirect(activeId: string | number) {
-    dispatch(setActiveId(`${activeId}`));
-    await chrome.storage.local.set({ activeId });
+    const id = `${activeId}`;
+    dispatch(setActiveId(id));
+    await chrome.storage.local.set({ activeId: id });
     return invoke({ message: "setDirect" });
   }
 
   // 设置系统代理
   async function setSystem(activeId: string | number) {
-    dispatch(setActiveId(`${activeId}`));
-    await chrome.storage.local.set({ activeId });
+    const id = `${activeId}`;
+    dispatch(setActiveId(id));
+    await chrome.storage.local.set({ activeId: id });
     return invoke({ message: "setSystem" });
   }
 

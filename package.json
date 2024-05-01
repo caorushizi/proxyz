@@ -1,7 +1,7 @@
 {
   "name": "proxyz",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.1.0",
+  "description": "一个代理设置工具",
   "scripts": {
     "start": "parcel watch src/manifest.json --host localhost",
     "build": "parcel build src/manifest.json --no-source-maps",
