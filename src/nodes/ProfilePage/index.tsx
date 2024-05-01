@@ -1,7 +1,7 @@
-import React, { useEffect } from "react";
+import React from "react";
 import PageView from "../../components/PageView";
 import { Button, ColorPicker, Modal, Space } from "antd";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../hooks";
 import {
   deleteProfileAction,
@@ -22,13 +22,6 @@ const Mode: React.FC = () => {
   const { id = "" } = useParams();
   const profile = useAppSelector((state) => selectProfileById(state, id));
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!profile) {
-      navigate("/");
-    }
-  }, []);
 
   const renderProfile = (profile: ProfileType) => {
     if (profile.type === ProxyMode.Proxy) {

@@ -5,8 +5,8 @@ import { ProForm } from "@ant-design/pro-components";
 import { Profile, ProxyMode } from "../../../helper/constant";
 import { useAppDispatch } from "../../../hooks";
 import { updateProfileAction } from "../../../store/profilesSlice";
-import Editor from "@monaco-editor/react";
 import { produce } from "immer";
+import MonacoEditor from "react-monaco-editor";
 
 type PACForm = {
   pacUrl?: string;
@@ -32,12 +32,11 @@ const EditorWrapper: FC<EditorProps> = ({
   onChange = () => {},
 }) => {
   return (
-    <Editor
-      height="300px"
+    <MonacoEditor
+      height="500"
       theme="vs-dark"
-      language="javascript"
       value={value}
-      onChange={(value) => onChange(value || "")}
+      onChange={onChange}
     />
   );
 };
